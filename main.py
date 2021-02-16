@@ -1,21 +1,25 @@
 import terrain
-import turtle
+from turtle import Turtle, Screen
 import time
 
 terrain.makeTerrain()
-print("done")
+WIDTH, HEIGHT = 1000, 1000
 s = 10
-
+screen = Screen()
+screen.setup(WIDTH, HEIGHT)
+screen.setworldcoordinates(0, HEIGHT, WIDTH, 0)
+screen.tracer(0, 0)
+#screen.mainloop()
 #destination
 def rect(p):
-    tur = turtle.Turtle()
+    tur = Turtle()
     
     #setters
     tur.ht()
     tur.up()
     tur.speed(0)
     for i in p:
-        if i[2] in ("M", "\n"): continue
+        if i[2] in ("\n"): continue
         x = i[0]
         y = i[1]
         c = i[2]
@@ -34,6 +38,7 @@ def rect(p):
         tur.setx(x - s / 2)
         tur.sety(y - s / 2)
         tur.end_fill()
+    screen.update()
 
 foo = open("Map.txt", 'r')
 karta = foo.read()
@@ -45,10 +50,12 @@ karta = foo.read()
 def getColor(c):
     if c == 'T':
         return "green"
-    elif c == 'W':
+    elif c == 'V':
         return "blue"
     elif c == 'G':
         return "brown"
+    elif c == 'M':
+        return "Maroon"
     else:
         return "Unknown token"
 
@@ -61,7 +68,7 @@ def drawMap(karta):
     for c in karta:
         if c == '\n':
             x = 0
-            y -= s
+            y += s
         else:
             nodes += [(x, y, c)]
             x += s
