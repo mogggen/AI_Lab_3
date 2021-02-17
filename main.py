@@ -2,14 +2,14 @@ import terrain
 from turtle import Turtle, Screen
 import time
 
-terrain.makeTerrain()
+terrain.perlinMap(5)
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 screen = Screen()
 screen.setup(WIDTH, HEIGHT)
 screen.setworldcoordinates(0, HEIGHT, WIDTH, 0)
 screen.tracer(0, 0)
-#screen.mainloop()
+
 #destination
 def rect(p):
     tur = Turtle()
@@ -55,7 +55,9 @@ def getColor(c):
     elif c == 'G':
         return "brown"
     elif c == 'M':
-        return "Maroon"
+        return "maroon"
+    elif c == 'B':
+        return "black"
     else:
         return "Unknown token"
 
@@ -91,3 +93,4 @@ def makeGraph(karta):
     return graph
 
 drawMap(karta)
+input()
