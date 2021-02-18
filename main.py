@@ -2,7 +2,7 @@ import terrain
 from turtle import Turtle, Screen
 import time
 
-terrain.perlinMap(5)
+terrain.perlinMap(10)
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 screen = Screen()
@@ -64,15 +64,14 @@ def getColor(c):
 def drawMap(karta):
     global s
     nodes = []
-    x = 0
-    y = 0
     
     for c in karta:
-        if c == '\n':
+        print(c)
+        if karta[c][0] == '\n':
             x = 0
             y += s
         else:
-            nodes += [(x, y, c)]
+            nodes += [(c[0] * s, c[1] * s, karta[c][1])]
             x += s
         
     rect(nodes)
@@ -93,4 +92,4 @@ def makeGraph(karta):
     return graph
 
 drawMap(karta)
-input()
+
