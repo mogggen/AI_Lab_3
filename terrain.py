@@ -7,6 +7,7 @@ karta = {}
 occupied = ()
 
 # AIs
+# W = workers
 # 0 = arbetare
 # 1 = upptäckare
 # 2 = soldater
@@ -29,12 +30,12 @@ occupied = ()
 # G = Sumpmark (0.5 m/s)
 # M = Mark (1 m/s)
 
-t = 'v', 'b', 'g', 'm'
+t = 'V', 'B', 'G', 'M'
+#t = 'v', 'b', 'g', 'm'
 
 def perlinMap(oct):
-    print("Generating noise...")
     temp = int(time.time())
-    print(temp)
+    print("seed", temp)
     noise = PerlinNoise(octaves=oct, seed = temp)
     pic = [[noise([i/100, j/100]) for j in range(100)] for i in range(100)]
     for y in enumerate(pic):

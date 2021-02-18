@@ -2,6 +2,8 @@ import terrain
 from turtle import Turtle, Screen
 import time
 
+ironIngots = []
+trees = []
 karta = terrain.perlinMap(2)
 
 WIDTH, HEIGHT = 1000, 1000
@@ -69,19 +71,11 @@ def drawMap(karta):
         nodes += [(c[0] * s, c[1] * s, karta[c][1])]
     rect(nodes)
 
-def makeGraph(karta):
-    graph = {}
-    x = 0
-    y = 0
-    #create grid
-    for k in karta:
-        if k == '\n':
-            x = 0
-            y += 1
-        else:
-            graph[(x, y)] = [k]
-            x += 1
-    return graph
+def connectPath():
+    pass
 
 drawMap(karta)
 input()
+def tick():
+    enterence = time.time()
+    
