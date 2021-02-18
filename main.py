@@ -2,7 +2,8 @@ import terrain
 from turtle import Turtle, Screen
 import time
 
-terrain.perlinMap(10)
+karta = terrain.perlinMap(2)
+
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 screen = Screen()
@@ -13,13 +14,14 @@ screen.tracer(0, 0)
 #destination
 def rect(p):
     tur = Turtle()
+    screen.colormode(255)
     
     #setters
     tur.ht()
     tur.up()
     tur.speed(0)
     for i in p:
-        if i[2] in ("\n"): continue
+        if str.islower(i[2]): continue
         x = i[0]
         y = i[1]
         c = i[2]
@@ -39,9 +41,7 @@ def rect(p):
         tur.sety(y - s / 2)
         tur.end_fill()
     screen.update()
-
-foo = open("Map.txt", 'r')
-karta = foo.read()
+    
 
 # T = Träd (5 st träd)
 # V = Vatten (UW)
@@ -49,33 +49,25 @@ karta = foo.read()
 # M = Mark (1 m/s)
 def getColor(c):
     if c == 'T':
-        return "green"
+        return 13, 77, 18
     elif c == 'V':
-        return "blue"
+        return 14, 113, 194
     elif c == 'G':
-        return "brown"
+        return 77, 66, 26
     elif c == 'M':
-        return "maroon"
+        return 212, 175, 42
     elif c == 'B':
-        return "black"
-    else:
-        return "Unknown token"
+        return 125, 125, 122
+    elif c == 'W':
+        return 214, 92, 11
 
 def drawMap(karta):
     global s
     nodes = []
     
     for c in karta:
-        print(c)
-        if karta[c][0] == '\n':
-            x = 0
-            y += s
-        else:
-            nodes += [(c[0] * s, c[1] * s, karta[c][1])]
-            x += s
-        
+        nodes += [(c[0] * s, c[1] * s, karta[c][1])]
     rect(nodes)
-    return nodes
 
 def makeGraph(karta):
     graph = {}
@@ -92,4 +84,4 @@ def makeGraph(karta):
     return graph
 
 drawMap(karta)
-
+input()
