@@ -7,22 +7,22 @@ karta = {}
 occupied = ()
 
 # AIs : karta[key][0][1]
-# 0 = arbetare red : or O, I, T, C om dem bär på respektive matrial
+# 0 = arbetare red : eller O, I, T, C om dem bär på respektive matrial
 # 1 = upptäckare : limeyellow
-# 2 = soldater pink : S om det bär på svärd
+# 2 = soldater pink
 # 3 = hantverkare lightblue
 
+# terrain properties : karta[key][0][1]
+# i = järnmalm (60 st totalt)
+# s = Svärd (för att göra soldater) (gör max 20 alltid)
+
 # buildings : karta[key][0][0] sjärnformade, med samma färg som arbetarna.
-# 4 = Kolmila
-# 5 = Smedja
-# 6 = Smältverk
-# 7 = Träningsläger
+# 4 = Kolmila : '44' empty, '43' operational
+# 5 = Smedja : '55' empty, '53' operational
+# 6 = Smältverk : '66' empty, '63' operational
+# 7 = Träningsläger : '77' empty, '73' operational
 
-# terrain properties : karta[0][1]
-# I = järnmalm (60 st totalt)
-# S = Svärd
-
-# terrain type
+# terrain type : karta[key][0][0]
 # lowercase = undiscovered land
 # V = Vatten (0 m/s)
 # B = Berg (0 m/s)
@@ -33,7 +33,7 @@ occupied = ()
 t = 'V', 'B', 'G', 'M'
 t = 'v', 'b', 'g', 'm'
 
-def getMap():
+def InitMap():
     h = terrain.read()
     chars = h[:]
     chars = str(chars).replace("\n", "").lower()
@@ -42,21 +42,23 @@ def getMap():
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])] * 2]
 
-    placeMaterial("0", 10)
-    placeMaterial('i', 60)
-    #placeMaterial("1", 5)
-    #placeMaterial("2", 20)
-    #placeMaterial("3", 15)
+    placeMaterial("1", 50)
+    placeMaterial('I', 60)
+    del h
+    del chars
     return karta
 
 def placeMaterial(mat, amount):
     global occupied
     occupied += (mat,)
-    where = R.randint(0, len(karta) - 1)
+    where = R.randint(0, 9999)
     x, y = where % 100, where // 100
     while amount:
-        where = R.randint(0, len(karta) - 1)
+        where = R.randint(0, 9999)
         x, y = where % 100, where // 100
         if karta[x, y][0][1] not in (t[:2] + occupied):
-            karta[x, y] = [karta[x, y][0][0] + mat]
+            if mat in ('0', '1', '2', '3'):
+                karta[x, y] = [str(karta[x, y][0][0]).upper() + mat]
+            else:
+                karta[x, y] = [karta[x, y][0][0] + mat]
             amount -= 1
