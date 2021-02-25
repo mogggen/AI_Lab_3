@@ -42,11 +42,32 @@ def InitMap():
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])] * 2]
 
-    placeMaterial("1", 50)
+    placeMaterial("1", 1)
     placeMaterial('I', 60)
     del h
     del chars
     return karta
+
+def walkableEdges():
+    r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
+    global karta
+    waitTime = 0
+    for g in karta:
+        for n in r:
+            pos = g[0] + n[0], g[1] + n[1]
+            if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100: continue
+            if t[2] in (str(karta[pos][0][0]).upper()):
+                waitTime += 10
+                if t[2] in (str(karta[pos[0], g[1]][0][0]).upper(),
+                str(karta[g[0], pos[1]][0][0]).upper()):
+                    waitTime += 4
+            elif t[3] in (str(karta[pos][0][0]).upper()):
+                waitTime += 20
+                if t[3] in (str(karta[pos[0], g[1]][0][0]).upper(),
+                str(karta[g[0], pos[1]][0][0]).upper()):
+                    waitTime += 8
+            karta[g] += [pos]
+            waitTime = 0
 
 def placeMaterial(mat, amount):
     global occupied

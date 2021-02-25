@@ -141,23 +141,17 @@ def drawMap():
 
 def Refresh(g, first=""):
     nodes = []
-    r = ((1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1))
+    r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     for n in r:
-        try:
-            pos = g[0] + n[0], g[1] + n[1]
+        pos = g[0] + n[0], g[1] + n[1]
+        if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100: continue
 
-            if karta[g][0][1] in (NPCs[1] + (first),):
-                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][0]).upper())]
-                karta[pos][0] = str(karta[pos][0][0]).upper() + karta[pos][0][1]
-            
-            #check if it's neighbour
-            if karta[pos][0][0] in terr[2:4]:
-                karta[g] += [pos]
-        except KeyError:
-            continue
+        if karta[g][0][1] in (NPCs[1] + (first),):
+            nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][0]).upper())]
+            karta[pos][0] = str(karta[pos][0][0]).upper() + karta[pos][0][1]
     return nodes
 
-def connectPath(first=""):
+def trackNPCs(first=""):
     nodes = []
     for g in karta:
         if karta[g][0][1] not in NPCs: continue
@@ -169,7 +163,7 @@ def connectPath(first=""):
         nodes += Refresh(g, first)
     rect(nodes)    
 
-connectPath(NPCs[0])
+trackNPCs(NPCs[0])
 drawMap()
 #input(workers)
 #input(explorers)
@@ -177,24 +171,30 @@ drawMap()
 #input(craftsmen)
 
 def move(pos, to):
-    temp = karta[pos][0][1]
+    curr = karta[pos][0][1]
     karta[pos][0] = karta[pos][0][0] * 2
-    new = pos[0] + to[0], pos[1] + to[1]
-    karta[new][0] = karta[new][0][0] + temp # connect revealed ground
-    explorers.append(new)
+    karta[to][0] = karta[to][0][0] + curr # pre connect everything in connectPath()
+    explorers.append(to)
+    Refresh(to)
 
 # Grade
 # 200 st '*C'
 # 20 st '*I'
 # 20 st '*2'
 def tick():
-    r = ((1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1))
+    #r = ((1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)) # check neighbours instead
     for _ in range(len(explorers)):
-        move(explorers.pop(0), terrain.R.choice(r))
-    connectPath()
+        pos = explorers.pop(0)
+        to = terrain.R.choice(karta[pos][1:])
+        if (0 <= pos[0] + to[0] < 100) and (0 <= pos[1] + to[1] < 100):
+            move(pos, to)
+        explorers.append(pos)
+    trackNPCs()
     drawMap()
     
 while True:
     enterence = time.time()
     tick()
-    time.sleep(1 - (time.time() - enterence))
+    finish = time.time()
+    print(len(explorers))
+    time.sleep(1 - (finish - enterence))
