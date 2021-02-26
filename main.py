@@ -66,6 +66,7 @@ def rect(p):
     tur = Turtle()
     screen.colormode(255)
     
+
     #setters
     tur.ht()
     tur.up()
@@ -134,36 +135,42 @@ def drawMap():
     global karta
     nodes = []
     
-    for c in karta:
-        if str(karta[c][0][0]).islower(): continue
-        nodes += [(c[0] * s, c[1] * s, karta[c][0][1])]
+    print(len(explorers))
+    for e in explorers:
+        nodes += [(e[0] * s, e[1] * s, karta[e][0][0])]
+        #for c in karta[e][1:]:
+        #    if renderPos(c) in nodes:
+        #        nodes += renderPos(c)
     rect(nodes)
 
-def Refresh(g, first=""):
+def reveal(g, first=False):
     nodes = []
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     for n in r:
         pos = g[0] + n[0], g[1] + n[1]
         if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100: continue
+        #finalversion = karta[g][0][1] == NPCs[not first]
 
-        if karta[g][0][1] in (NPCs[1] + (first),):
-            nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][0]).upper())]
+
+        if karta[g][0][1] in (NPCs[1], (NPCs[0],)[:first]):
+            if (pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper()) not in nodes:
+                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper())]
             karta[pos][0] = str(karta[pos][0][0]).upper() + karta[pos][0][1]
     return nodes
 
-def trackNPCs(first=""):
+def findNPCs(first=False):
     nodes = []
     for g in karta:
         if karta[g][0][1] not in NPCs: continue
-        elif karta[g][0][1] in NPCs[0]: workers.append(g)
-        elif karta[g][0][1] in NPCs[1]: explorers.append(g)
-        elif karta[g][0][1] in NPCs[2]: soldiers.append(g)
-        elif karta[g][0][1] in NPCs[0]: craftsmen.append(g)
+        elif karta[g][0][1] == NPCs[0]: workers.append(g)
+        elif karta[g][0][1] == NPCs[1]: explorers.append(g)
+        elif karta[g][0][1] == NPCs[2]: soldiers.append(g)
+        elif karta[g][0][1] == NPCs[3]: craftsmen.append(g)
         
-        nodes += Refresh(g, first)
-    rect(nodes)    
+        nodes += reveal(g, first)
+    rect(nodes)
 
-trackNPCs(NPCs[0])
+findNPCs(True)
 drawMap()
 #input(workers)
 #input(explorers)
@@ -174,8 +181,8 @@ def move(pos, to):
     curr = karta[pos][0][1]
     karta[pos][0] = karta[pos][0][0] * 2
     karta[to][0] = karta[to][0][0] + curr # pre connect everything in connectPath()
-    explorers.append(to)
-    Refresh(to)
+    rect(reveal(to))
+    #drawMap()
 
 # Grade
 # 200 st '*C'
@@ -183,18 +190,24 @@ def move(pos, to):
 # 20 st '*2'
 def tick():
     #r = ((1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)) # check neighbours instead
+    for _ in range(len(workers)):
+        pos = explorers.pop(0)
+        to = terrain.R.choice(karta[pos][1:])
+        if 0 <= to[0] < 100 and 0 <= to[1] < 100:
+            move(pos, to)
+        explorers.append(to)
+    
     for _ in range(len(explorers)):
         pos = explorers.pop(0)
         to = terrain.R.choice(karta[pos][1:])
-        if (0 <= pos[0] + to[0] < 100) and (0 <= pos[1] + to[1] < 100):
+        if 0 <= to[0] < 100 and 0 <= to[1] < 100:
             move(pos, to)
-        explorers.append(pos)
-    trackNPCs()
-    drawMap()
+        explorers.append(to)
     
 while True:
     enterence = time.time()
     tick()
     finish = time.time()
-    print(len(explorers))
-    time.sleep(1 - (finish - enterence))
+    print(finish - enterence)
+    #print(len(explorers))
+    #time.sleep(1 - (finish - enterence))

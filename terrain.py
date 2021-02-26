@@ -42,10 +42,10 @@ def InitMap():
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])] * 2]
 
-    placeMaterial("1", 1)
+    placeMaterial("0", 1)
+    placeMaterial("1", 7)
     placeMaterial('I', 60)
-    del h
-    del chars
+    walkableEdges()
     return karta
 
 def walkableEdges():
