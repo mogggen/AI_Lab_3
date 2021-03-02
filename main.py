@@ -172,6 +172,25 @@ def findNPCs(first=False):
 
 findNPCs(True)
 drawMap()
+
+nodesGG = []
+def find(g):
+    global nodesGG
+    if karta[g][0][0].upper() not in terr[3:5]: return
+    for neighboors in karta[g][1:]:
+        print(karta[g])
+        if neighboors not in nodesGG:
+            nodesGG += [(neighboors[0] * s, neighboors[1] * s, karta[neighboors][0][0])]
+            find(neighboors)
+        return
+
+find(workers[0])
+print(nodesGG)
+print("done")
+rect(nodesGG)
+del nodesGG
+input()
+
 #input(workers)
 #input(explorers)
 #input(soldiers)
