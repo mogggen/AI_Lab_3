@@ -33,6 +33,12 @@ screen = Screen()
 screen.setup(WIDTH, HEIGHT)
 screen.setworldcoordinates(0, HEIGHT, WIDTH, 0)
 screen.tracer(0, 0)
+screen.colormode(255)
+tur = Turtle(undobuffersize=0)
+tur.ht()
+tur.up()
+tur.speed(0)
+nodesGG = []
 
 #destination
 def Building(p):
@@ -62,15 +68,8 @@ def Building(p):
         tur.end_fill()
     screen.update()
 
-def rect(p):
-    tur = Turtle()
-    screen.colormode(255)
-    
-
+def rect(tur, p):
     #setters
-    tur.ht()
-    tur.up()
-    tur.speed(0)
     for i in p:
         if str.islower(i[2]): continue
         x = i[0]
@@ -141,7 +140,7 @@ def drawMap():
         #for c in karta[e][1:]:
         #    if renderPos(c) in nodes:
         #        nodes += renderPos(c)
-    rect(nodes)
+    rect(tur, nodes)
 
 def reveal(g, first=False):
     nodes = []
@@ -154,7 +153,7 @@ def reveal(g, first=False):
 
         if karta[g][0][1] in (NPCs[1], (NPCs[0],)[:first]):
             if (pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper()) not in nodes:
-                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper())]
+                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][1]))]
             karta[pos][0] = str(karta[pos][0][0]).upper() + karta[pos][0][1]
     return nodes
 
@@ -168,12 +167,12 @@ def findNPCs(first=False):
         elif karta[g][0][1] == NPCs[3]: craftsmen.append(g)
         
         nodes += reveal(g, first)
-    rect(nodes)
+    rect(tur, nodes)
 
 findNPCs(True)
 drawMap()
 
-nodesGG = []
+
 def find(g):
     global nodesGG
     if karta[g][0][0].upper() not in terr[3:5]: return
@@ -184,12 +183,11 @@ def find(g):
             find(neighboors)
         return
 
-find(workers[0])
+#find(workers[0])
 print(nodesGG)
 print("done")
-rect(nodesGG)
-del nodesGG
-input()
+#rect(nodesGG)
+#input()
 
 #input(workers)
 #input(explorers)
@@ -200,7 +198,7 @@ def move(pos, to):
     curr = karta[pos][0][1]
     karta[pos][0] = karta[pos][0][0] * 2
     karta[to][0] = karta[to][0][0] + curr # pre connect everything in connectPath()
-    rect(reveal(to))
+    rect(tur, reveal(to))
     #drawMap()
 
 # Grade
