@@ -16,8 +16,11 @@ timeToBuildBuilding = 60 #seconds
 timetoBecomeExplorer = 60 #seconds
 
 #finishing times
-oneBuilding = 6000 + 60 + 60 #seconds needs 2 wood / 60 seconds
-twoBuildings = 3000 + 120 + 0 #seconds needs 4 wood / 60 seconds
-treeBuildings = 1500 + 180 + 0 #seconds needs 6 wood / 60 seconds
-fourBuildings = 750 + 240 + 0 #seconds neeeds 8 wood / 60 seconds
-fiveBuildings = 375 + 300 + 0 #seconds needs 10 wood / 60 seconds
+#build all first, then start producing
+sixBuildings = 1000 + 1080 #seconds needs 12 wood / 60 seconds
+
+for x in range(1, 10):
+    length = "=" * int((6000 / (x) + 180 * x) // 100)
+    print(length)
+
+#

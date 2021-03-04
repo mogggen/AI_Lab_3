@@ -1,5 +1,5 @@
 import terrain
-from turtle import Turtle, Screen
+import pygame
 import time
 
 workers = [] # '0' # no clue
@@ -16,6 +16,10 @@ wood = [] # 'W', 'w' when carried.
 charCole = [] # 'C', 'c' when carried.
 ironIngots = [] # 'I', 'i' when carried.
 
+pygame.init()
+screen = pygame.display.set_mode((1000, 1000))
+
+
 
 karta = terrain.InitMap()
 
@@ -29,46 +33,19 @@ wepn = 'S', # maybe invisable at all time
 
 WIDTH, HEIGHT = 1000, 1000
 s = 10
-screen = Screen()
-screen.setup(WIDTH, HEIGHT)
-screen.setworldcoordinates(0, HEIGHT, WIDTH, 0)
-screen.tracer(0, 0)
-screen.colormode(255)
-tur = Turtle(undobuffersize=0)
-tur.ht()
-tur.up()
-tur.speed(0)
 nodesGG = []
 
 #destination
 def Building(p):
-    tur = Turtle()
-    screen.colormode(255)
-    input()
-    #setters
-    #tur.ht()
-    #tur.up()
-    tur.speed(0)
     for i in p:
         if str.islower(i[2]): continue
         x = i[0]
         y = i[1]
         c = i[2]
         
-        tur.fillcolor(getColor(c))
+        getColor(c)
 
-        #position
-        tur.goto(x - s / 2, y)
-
-        #fill rec
-        tur.begin_fill()
-        for _ in range(4):
-            tur.fd(s)
-            tur.rt(45)
-        tur.end_fill()
-    screen.update()
-
-def rect(tur, p):
+def rect(p):
     #setters
     for i in p:
         if str.islower(i[2]): continue
@@ -76,20 +53,11 @@ def rect(tur, p):
         y = i[1]
         c = i[2]
         
-        tur.fillcolor(getColor(c))
-
-        #position
-        tur.goto(x - s / 2, y - s / 2)
-
-        #fill rec
-        tur.begin_fill()
-        
-        tur.setx(x + s / 2)
-        tur.sety(y + s / 2)
-        tur.setx(x - s / 2)
-        tur.sety(y - s / 2)
-        tur.end_fill()
-    screen.update()
+        getColor(c)
+        rect = pygame.Rect(x, y, s, s)
+        pygame.draw.rect(screen, getColor(c), rect, 1)
+        screen.fill(getColor(c), rect)
+    pygame.display.flip()
 
 def getColor(c):
     #terr
@@ -140,7 +108,7 @@ def drawMap():
         #for c in karta[e][1:]:
         #    if renderPos(c) in nodes:
         #        nodes += renderPos(c)
-    rect(tur, nodes)
+    rect(nodes)
 
 def reveal(g, first=False):
     nodes = []
@@ -153,7 +121,7 @@ def reveal(g, first=False):
 
         if karta[g][0][1] in (NPCs[1], (NPCs[0],)[:first]):
             if (pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper()) not in nodes:
-                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][1]))]
+                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper())]
             karta[pos][0] = str(karta[pos][0][0]).upper() + karta[pos][0][1]
     return nodes
 
@@ -167,7 +135,7 @@ def findNPCs(first=False):
         elif karta[g][0][1] == NPCs[3]: craftsmen.append(g)
         
         nodes += reveal(g, first)
-    rect(tur, nodes)
+    rect(nodes)
 
 findNPCs(True)
 drawMap()
@@ -198,7 +166,7 @@ def move(pos, to):
     curr = karta[pos][0][1]
     karta[pos][0] = karta[pos][0][0] * 2
     karta[to][0] = karta[to][0][0] + curr # pre connect everything in connectPath()
-    rect(tur, reveal(to))
+    rect(reveal(to))
     #drawMap()
 
 # Grade
@@ -225,6 +193,6 @@ while True:
     enterence = time.time()
     tick()
     finish = time.time()
-    print(finish - enterence)
-    #print(len(explorers))
+    #print(finish - enterence)
+    print(len(explorers))
     #time.sleep(1 - (finish - enterence))
