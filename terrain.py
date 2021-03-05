@@ -30,8 +30,8 @@ occupied = ()
 # M = Mark (1 m/s)
 # T = Träd (? m/s) (5 st träd / 30 sek) 
 
-t = 'V', 'B', 'G', 'M'
-t = 'v', 'b', 'g', 'm'
+unwalkables = 'v', 'b'
+walkables = 'm', 't', 'g'
 
 def InitMap():
     h = terrain.read()
@@ -40,7 +40,7 @@ def InitMap():
     h = str(h).split('\n')
     for y in enumerate(h):
         for x in enumerate(y[1]):
-            karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])] * 2]
+            karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]] # render [0][-1] instead of [0][2]
 
     placeMaterial("0", 0)
     placeMaterial("1", 50)
@@ -51,33 +51,29 @@ def InitMap():
 def walkableEdges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     global karta
-    waitTime = 0
+    waitTime = 5
     for g in karta:
         for n in r:
             pos = g[0] + n[0], g[1] + n[1]
-            if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100: continue
-            if t[2] in (str(karta[pos][0][0]).upper()):
-                waitTime += 10
-                if t[2] in (str(karta[pos[0], g[1]][0][0]).upper(),
-                str(karta[g[0], pos[1]][0][0]).upper()):
-                    waitTime += 4
-            elif t[3] in (str(karta[pos][0][0]).upper()):
-                waitTime += 20
-                if t[3] in (str(karta[pos[0], g[1]][0][0]).upper(),
-                str(karta[g[0], pos[1]][0][0]).upper()):
-                    waitTime += 8
-            karta[g] += [pos]
-            waitTime = 0
+            if not 0 <= pos[0] < 100 or not 0 <= pos[1] < 100 or karta[pos] in unwalkables:
+                continue
+            
+            for w in enumerate(walkables):
+                if w[1] in (str(karta[pos][0][0])):
+                    if (n[0] + [1]) % 2:
+                        waitTime += 5 * (w[0] + 1)
+                    else:
+                        waitTime += 9 * (w[0] + 1)
+            karta[g] += [pos + (waitTime,)]
+            waitTime = 5
 
 def placeMaterial(mat, amount):
-    global occupied
-    occupied += (mat,)
     where = R.randint(0, 9999)
     x, y = where % 100, where // 100
     while amount:
         where = R.randint(0, 9999)
         x, y = where % 100, where // 100
-        if karta[x, y][0][1] not in (t[:2] + occupied):
+        if karta[x, y][0][1] not in (t[:2]):
             if mat in ('0', '1', '2', '3'):
                 karta[x, y] = [str(karta[x, y][0][0]).upper() + mat]
             else:
