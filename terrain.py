@@ -3,8 +3,47 @@ import math
 import time
 import random as R
 terrain = open("Map.txt", 'r')
+
+start = R.randint(0, 9_999)
+
+terrainColor = {
+    'T' : (13, 77, 18),
+
+    'G' : (77, 66, 26),
+    'M' : (212, 175, 42),
+
+    'V' : (14, 113, 194),
+    'B' : (125, 125, 122)
+    }
+
+NPCs = (
+    (214, 92, 11), #0
+    (177, 204, 41) #1
+)
+
+class Tile:
+    def __init__(self, pos, walkSpeed):
+        self.pos = pos
+        self.walkSpeed = walkSpeed
+
+class Entity:
+    def __init__(self, variant):
+        self.position = R.randint(0, 8)
+        self.idleTime = 0
+
+class Building:
+    def __init__(self, pos, variant):
+        self.pos = pos
+        self.variant = variant
+
+class Item:
+    def __init__(self, pos, variant):
+        self.pos = pos
+        self.variant = variant
+
+        
+
 karta = {}
-occupied = ()
 
 # AIs : karta[key][0][1]
 # 0 = arbetare red : eller O, I, T, C om dem bär på respektive matrial
@@ -28,7 +67,7 @@ occupied = ()
 # B = Berg (0 m/s)
 # G = Sumpmark (0.5 m/s)
 # M = Mark (1 m/s)
-# T = Träd (? m/s) (5 st träd / 30 sek) 
+# T = Träd (0.75 m/s) (5 st träd / 30 sek)
 
 unwalkables = 'v', 'b'
 walkables = 'm', 't', 'g'
@@ -42,9 +81,10 @@ def InitMap():
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]] # render [0][-1] instead of [0][2]
 
-    placeMaterial("0", 0)
-    placeMaterial("1", 50)
-    placeMaterial('I', 60)
+    placeMaterial("0", 0) #workers
+    placeMaterial("1", 50) #trees
+
+    placeMaterial('I', 60) #Iron Ore
     walkableEdges()
     return karta
 

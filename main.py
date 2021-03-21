@@ -59,44 +59,7 @@ def rect(p):
         screen.fill(getColor(c), rect)
     pygame.display.flip()
 
-def getColor(c):
-    #terr
-    if c == 'T':
-        return 13, 77, 18
-    elif c == 'V':
-        return 14, 113, 194
-    elif c == 'G':
-        return 77, 66, 26
-    elif c == 'M':
-        return 212, 175, 42
-    elif c == 'B':
-        return 125, 125, 122
 
-    #NPCs
-    elif c in ('0', 'i', 'w', 'c', 'o'):
-        return 214, 92, 11
-    elif c == '1':
-        return 177, 204, 41
-    elif c in ('2', 's'):
-        return 255, 0, 153
-    elif c == '3': # lives in the corresponding building
-        return 69, 209, 200
-
-    #Iron
-    elif c == 'I': # maybe invisable at all time
-        return 165, 198, 204
-    elif c == 'O':
-        return 48, 111, 122
-    
-    #sword
-    elif c == 'S': # maybe invisable at all time
-        return 255, 0, 0
-    
-    #wood
-    elif c == 'W':
-        return 158, 75, 44
-    elif c == 'C': # maybe invisable at all time
-        return 22, 22, 22
 
 def drawMap():
     global karta
