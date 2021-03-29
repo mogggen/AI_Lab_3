@@ -1,65 +1,23 @@
-from perlin_noise import PerlinNoise
 import math
 import time
 import random as R
 terrain = open("Map.txt", 'r')
 
 start = R.randint(0, 9_999)
-
-terrainColor = {
-    'T' : (13, 77, 18),
-
-    'G' : (77, 66, 26),
-    'M' : (212, 175, 42),
-
-    'V' : (14, 113, 194),
-    'B' : (125, 125, 122)
-    }
-
-NPCs = (
-    (214, 92, 11), #0
-    (177, 204, 41) #1
-)
-
-class Tile:
-    def __init__(self, pos, walkSpeed):
-        self.pos = pos
-        self.walkSpeed = walkSpeed
-
-class Entity:
-    def __init__(self, variant):
-        self.position = R.randint(0, 8)
-        self.idleTime = 0
-
-class Building:
-    def __init__(self, pos, variant):
-        self.pos = pos
-        self.variant = variant
-
-class Item:
-    def __init__(self, pos, variant):
-        self.pos = pos
-        self.variant = variant
-
-        
-
 karta = {}
 
-# AIs : karta[key][0][1]
+# Agents
 # 0 = arbetare red : eller O, I, T, C om dem bär på respektive matrial
 # 1 = upptäckare : limeyellow
 # 2 = soldater pink
 # 3 = hantverkare lightblue
 
-# terrain properties : karta[key][0][1]
+# terrain properties 
 # i = järnmalm (60 st totalt)
 # s = Svärd (för att göra soldater) (gör max 20 alltid)
 
 # buildings : karta[key][0][0] sjärnformade, med samma färg som arbetarna.
-# 4 = Kolmila : '44' empty, '43' operational
-# 5 = Smedja : '55' empty, '53' operational
-# 6 = Smältverk : '66' empty, '63' operational
-# 7 = Träningsläger : '77' empty, '73' operational
+#Kolmila
 
 # terrain type : karta[key][0][0]
 # lowercase = undiscovered land
@@ -67,7 +25,7 @@ karta = {}
 # B = Berg (0 m/s)
 # G = Sumpmark (0.5 m/s)
 # M = Mark (1 m/s)
-# T = Träd (0.75 m/s) (5 st träd / 30 sek)
+# T = Träd (0.75 m/s) (5 st träd per ruta/ 30 sek)
 
 unwalkables = 'v', 'b'
 walkables = 'm', 't', 'g'
@@ -79,43 +37,22 @@ def InitMap():
     h = str(h).split('\n')
     for y in enumerate(h):
         for x in enumerate(y[1]):
-            karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]] # render [0][-1] instead of [0][2]
+            karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]]
 
-    placeMaterial("0", 0) #workers
-    placeMaterial("1", 50) #trees
-
-    placeMaterial('I', 60) #Iron Ore
     walkableEdges()
     return karta
 
 def walkableEdges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     global karta
-    waitTime = 5
+    moveSpeed = 0
     for g in karta:
         for n in r:
             pos = g[0] + n[0], g[1] + n[1]
-            if not 0 <= pos[0] < 100 or not 0 <= pos[1] < 100 or karta[pos] in unwalkables:
+            if not 0 <= pos[0] < 100 or not 0 <= pos[1] < 100 or (karta[pos] in unwalkables):
                 continue
             
-            for w in enumerate(walkables):
-                if w[1] in (str(karta[pos][0][0])):
-                    if (n[0] + [1]) % 2:
-                        waitTime += 5 * (w[0] + 1)
-                    else:
-                        waitTime += 9 * (w[0] + 1)
-            karta[g] += [pos + (waitTime,)]
-            waitTime = 5
+            moveSpeed = .5 + bool(karta[pos][0] is not walkables[0]) / 2
+            karta[g] += [pos + (moveSpeed,)]
+    print("walkableEdges Done!")
 
-def placeMaterial(mat, amount):
-    where = R.randint(0, 9999)
-    x, y = where % 100, where // 100
-    while amount:
-        where = R.randint(0, 9999)
-        x, y = where % 100, where // 100
-        if karta[x, y][0][1] not in (t[:2]):
-            if mat in ('0', '1', '2', '3'):
-                karta[x, y] = [str(karta[x, y][0][0]).upper() + mat]
-            else:
-                karta[x, y] = [karta[x, y][0][0] + mat]
-            amount -= 1
