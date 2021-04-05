@@ -1,16 +1,17 @@
-import agent
-class baseState:
+import pathfinding
+
+
+class BaseState:
     def Enter(self, agent):
         pass
 
     def Execute(self, agent):
         pass
 
-    def Exit(self, agent):
-        pass
 
-class MoveState(baseState):
+class MoveState(BaseState):
     def Enter(self, agent):
-        #goto goal
+        agent.pathToGoal = pathfinding.getAstarPath(agent)
+
     def Execute(self, agent):
-        if goal is in resources
+        agent.move()

@@ -1,36 +1,22 @@
-import random
 import fsm
-import pathfinding
-import goal
+import enums
 
-agents = ()
-
-
-class AgentEnum:
-    WORKER = 1
-    SCOUT = 2
-    BUILDER = 3
-    MILLER = 4
-
-
-class ItemEnum:
-    none = 0
-    tree = 1
-    charcoal = 2
+agents = []
 
 
 class Agent:
     def __init__(self, pos):
         self.pos = pos
-        self.goal = GoalEnum.CHOPPING_GOAL
+        self.goal = enums.GoalEnum.CHOPPING_GOAL
+        self.pathToGoal = []
         self.goalPos = -1, -1
 
-        self.agentType = AgentEnum.WORKER
-        self.state = fsm.Change(self)
-        self.holding = ItemEnum.none
+        self.agentType = enums.AgentEnum.WORKER
+        self.state = self.ChangeState(fsm.BaseState())
+        self.startTime = 0
+        self.holding = enums.ItemEnum.none
 
     def ChangeState(self, newState):
-        self.state.Exit(self)
         self.state = newState
         self.state.Enter(self)
 

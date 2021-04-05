@@ -12,11 +12,8 @@ class Point:
         self.y = p[1]
 
     def __abs__(self):
-        x = abs(self.x)
-        y = abs(self.y)
-
-    def __len__(self, o):
-        return ((self.x - o.x)**2 + (self.y - o.y)**2)**.5
+        self.x = abs(self.x)
+        self.y = abs(self.y)
 
     def __add__(self, o):
         self.x += o.x
@@ -90,7 +87,7 @@ def drawMap():
     global karta
     nodes = []
 
-    print(len(explorers))
+    # print(len(explorers))
     for e in explorers:
         nodes += [(e[0] * s, e[1] * s, karta[e][0][0])]
         # for c in karta[e][1:]:
@@ -171,5 +168,5 @@ while True:
     tick()
     finish = time.time()
     # print(finish - enterence)
-    print(len(explorers))
+    # print(len(explorers))
     # time.sleep(1 - (finish - enterence))
