@@ -1,4 +1,5 @@
 import terrain
+import agent
 import pygame
 import time
 
@@ -27,18 +28,19 @@ prod = 'I', 'C'  # maybe invisable at all time
 
 WIDTH, HEIGHT = 1000, 1000
 s = 10
-nodesGG = []
 
 
 # destination
-def Building(p):
+def player(p):
     for i in p:
         # if str.islower(i[2]): continue
-        x = i[0]
-        y = i[1]
-        c = i[2]
-
-        getColor(c)
+        x = i[0] // 10
+        y = i[1] // 10
+        c = i[2].upper()
+        rect = pygame.Rect(int(i[0]), int(i[1]), 1, 1)
+        pygame.draw.rect(screen, getColor(c), rect, 1)
+        screen.fill(getColor(c), rect)
+    pygame.display.update(rect)
 
 
 def rect(p):
@@ -132,9 +134,8 @@ drawMap()
 
 
 def move(pos, to):
-    curr = karta[pos][0][1]
-    karta[pos][0] = karta[pos][0][0] * 2
-    karta[to][0] = karta[to][0][0] + curr  # pre connect everything in connectPath()
+    #if time.time()
+    
     rect(reveal(to))
     # drawMap()
 
@@ -156,12 +157,22 @@ def tick():
             move(pos, to)
         explorers.append(to)
 
-
+#agent.agents.append()
+xy1 = 100, 100
+xy2 = 100, 100
+straightDelay = 0
+diagonalDelay = 0
+#loop
 while True:
-    enterence = time.time()
-    # tick()
+    #tick()
     updateMap()
-    finish = time.time()
-#    print(finish - enterence)
 
-    #time.sleep(1 - (finish - enterence))
+    if time.time() > straightDelay:
+        xy1 = round(xy1[0] + .1, 1), round(xy1[1], 1)
+        player([(xy1[0], xy1[1], 'V')])
+        straightDelay = time.time() + .1
+
+    if time.time() > diagonalDelay:
+        xy2 = round(xy2[0] + .1, 1), round(xy2[1] + .1, 1)
+        player([(xy2[0], xy2[1], 'V')])
+        diagonalDelay = time.time() + .14
