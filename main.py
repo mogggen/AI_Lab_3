@@ -32,12 +32,13 @@ s = 10
 
 # destination
 def player(p):
+    rect = None
     for i in p:
         # if str.islower(i[2]): continue
-        x = i[0] // 10
-        y = i[1] // 10
-        c = i[2].upper()
-        rect = pygame.Rect(int(i[0]), int(i[1]), 1, 1)
+        x = i[0].real // 10
+        y = i[0].imag // 10
+        c = i[1].upper()
+        rect = pygame.Rect(int(x), int(y), 1, 1)
         pygame.draw.rect(screen, getColor(c), rect, 1)
         screen.fill(getColor(c), rect)
     pygame.display.update(rect)
@@ -134,8 +135,8 @@ drawMap()
 
 
 def move(pos, to):
-    #if time.time()
-    
+    # if time.time()
+
     rect(reveal(to))
     # drawMap()
 
@@ -157,22 +158,25 @@ def tick():
             move(pos, to)
         explorers.append(to)
 
-#agent.agents.append()
-xy1 = 100, 100
-xy2 = 100, 100
+
+# agent.agents.append()
+xy1 = 100 + 100j
+xy2 = 100 + 100j
 straightDelay = 0
 diagonalDelay = 0
-#loop
+# loop
 while True:
-    #tick()
+    # tick()
     updateMap()
 
     if time.time() > straightDelay:
-        xy1 = round(xy1[0] + .1, 1), round(xy1[1], 1)
-        player([(xy1[0], xy1[1], 'V')])
+        xy1 = round(xy1.real + .1, 1)
+        player([(xy1, 'V')])
         straightDelay = time.time() + .1
+        karta[int(xy1.real), int(xy1.imag)][0] = (karta[int(xy1.real), int(xy1.imag)][0]).upper()
 
     if time.time() > diagonalDelay:
         xy2 = round(xy2[0] + .1, 1), round(xy2[1] + .1, 1)
         player([(xy2[0], xy2[1], 'V')])
         diagonalDelay = time.time() + .14
+        karta[int(xy2.real), int(xy2.imag)][0] = (karta[int(xy2.real), int(xy2.imag)][0]).upper()
