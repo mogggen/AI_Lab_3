@@ -24,30 +24,35 @@ buil = '4', '5', '6', '7'  # placed on 'M'
 
 NPCs = '0', '1', '2', '3'  # can't share position
 mats = 'O', 'W'
-prod = 'I', 'C'  # maybe invisable at all time
+prod = 'I', 'C'  # maybe invisible at all time
 
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 
+xy1 = 10.3, 10.3
+xy2 = 10.0, 10.3
+
+karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
 
 # destination
 def player(p):
     rect = None
     for i in p:
         # if str.islower(i[2]): continue
-        x = i[0].real // 10
-        y = i[0].imag // 10
-        c = i[1].upper()
-        rect = pygame.Rect(int(x), int(y), 1, 1)
+        x = i[0] // 10
+        y = i[1] // 10
+        c = i[2].upper()
+        rect = pygame.Rect(int(i[0] * s), int(i[1] * s), 2, 2)
         pygame.draw.rect(screen, getColor(c), rect, 1)
         screen.fill(getColor(c), rect)
-    pygame.display.update(rect)
+    pygame.display.flip()
 
 
 def rect(p):
-    # setters
+    rect = None
     for i in p:
-        if str.islower(i[2]): continue
+        if str.islower(i[2]):
+            continue
         x = i[0]
         y = i[1]
         c = i[2].upper()
@@ -81,19 +86,19 @@ def getColor(c):
         return 69, 209, 200
 
     # Iron
-    elif c == 'I':  # maybe invisable at all time
+    elif c == 'I':  # maybe invisible at all time
         return 165, 198, 204
     elif c == 'O':
         return 48, 111, 122
 
     # sword
-    elif c == 'S':  # maybe invisable at all time
+    elif c == 'S':  # maybe invisible at all time
         return 255, 0, 0
 
     # wood
     elif c == 'W':
         return 158, 75, 44
-    elif c == 'C':  # maybe invisable at all time
+    elif c == 'C':  # maybe invisible at all time
         return 22, 22, 22
 
 
@@ -110,10 +115,15 @@ def drawMap():
 
 
 def updateMap():
+    global xy1
+    global xy2
     p = []
     for g in karta:
         p.append(g + (karta[g][0],))
     rect(p)
+
+    player([(xy1[0], xy1[1], 'V')])
+    player([(xy2[0], xy2[1], 'V')])
 
 
 def reveal(g, first=False):
@@ -121,8 +131,9 @@ def reveal(g, first=False):
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     for n in r:
         pos = g[0] + n[0], g[1] + n[1]
-        if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100: continue
-        # finalversion = karta[g][0][1] == NPCs[not first]
+        if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100:
+            continue
+        # finalVersion = karta[g][0][1] == NPCs[not first]
 
         if karta[g][0][1] in (NPCs[1], (NPCs[0],)[:first]):
             if (pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper()) not in nodes:
@@ -131,7 +142,7 @@ def reveal(g, first=False):
     return nodes
 
 
-drawMap()
+#drawMap()
 
 
 def move(pos, to):
@@ -159,24 +170,27 @@ def tick():
         explorers.append(to)
 
 
-# agent.agents.append()
-xy1 = 100 + 100j
-xy2 = 100 + 100j
 straightDelay = 0
 diagonalDelay = 0
 # loop
 while True:
     # tick()
-    updateMap()
 
+    entrence = time.time()
     if time.time() > straightDelay:
         xy1 = round(xy1.real + .1, 1)
         player([(xy1, 'V')])
         straightDelay = time.time() + .1
-        karta[int(xy1.real), int(xy1.imag)][0] = (karta[int(xy1.real), int(xy1.imag)][0]).upper()
+        karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
+        #print(karta[int(xy1[0]), int(xy1[1])][0])
 
     if time.time() > diagonalDelay:
         xy2 = round(xy2[0] + .1, 1), round(xy2[1] + .1, 1)
         player([(xy2[0], xy2[1], 'V')])
         diagonalDelay = time.time() + .14
-        karta[int(xy2.real), int(xy2.imag)][0] = (karta[int(xy2.real), int(xy2.imag)][0]).upper()
+        karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
+        #print(karta[int(xy2[0]), int(xy2[1])][0])
+
+
+    #time.sleep(1 - (time.time() - entrence))
+    updateMap()

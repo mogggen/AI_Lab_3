@@ -63,7 +63,6 @@ def walkableEdges():
                 if not (n[0] + n[1]) % 2:
                     v = round((2 * v ** 2) ** .5, 1)
             karta[g] += [pos + (v,)]
-    print(karta)
 
 
 def placeAgents():
