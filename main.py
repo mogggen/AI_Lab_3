@@ -36,30 +36,25 @@ karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper(
 
 # destination
 def player(p):
-    rect = None
     for i in p:
-        # if str.islower(i[2]): continue
-        x = i[0] // 10
-        y = i[1] // 10
+        x = int(i[0] * s)
+        y = int(i[1] * s)
         c = i[2].upper()
-        rect = pygame.Rect(int(i[0] * s), int(i[1] * s), 2, 2)
+        rect = pygame.Rect(x, y, 2, 2)
         pygame.draw.rect(screen, getColor(c), rect, 1)
         screen.fill(getColor(c), rect)
-    pygame.display.flip()
 
 
 def rect(p):
-    rect = None
     for i in p:
         if str.islower(i[2]):
             continue
-        x = i[0]
-        y = i[1]
+        x = i[0] * s
+        y = i[1] * s
         c = i[2].upper()
-        rect = pygame.Rect(x * s, y * s, s, s)
+        rect = pygame.Rect(x, y, s, s)
         pygame.draw.rect(screen, getColor(c), rect, 1)
         screen.fill(getColor(c), rect)
-    pygame.display.flip()
 
 
 def getColor(c):
@@ -124,6 +119,7 @@ def updateMap():
 
     player([(xy1[0], xy1[1], 'V')])
     player([(xy2[0], xy2[1], 'V')])
+    pygame.display.flip()
 
 
 def reveal(g, first=False):
@@ -174,12 +170,9 @@ straightDelay = 0
 diagonalDelay = 0
 # loop
 while True:
-    # tick()
-
-    entrence = time.time()
     if time.time() > straightDelay:
-        xy1 = round(xy1.real + .1, 1)
-        player([(xy1, 'V')])
+        xy1 = round(xy1[0] + .1, 1), xy1[1]
+        player([(xy1[0], xy1[1], 'V')])
         straightDelay = time.time() + .1
         karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
         #print(karta[int(xy1[0]), int(xy1[1])][0])
@@ -190,7 +183,5 @@ while True:
         diagonalDelay = time.time() + .14
         karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
         #print(karta[int(xy2[0]), int(xy2[1])][0])
-
-
-    #time.sleep(1 - (time.time() - entrence))
     updateMap()
+    pygame.display.flip()
