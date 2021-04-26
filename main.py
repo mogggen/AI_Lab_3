@@ -40,9 +40,9 @@ def player(p):
         x = int(i[0] * s)
         y = int(i[1] * s)
         c = i[2].upper()
-        rect = pygame.Rect(x, y, 2, 2)
-        pygame.draw.rect(screen, getColor(c), rect, 1)
-        screen.fill(getColor(c), rect)
+        square = pygame.Rect(x, y, 2, 2)
+        pygame.draw.rect(screen, getColor(c), square, 1)
+        screen.fill(getColor(c), square)
 
 
 def rect(p):
@@ -52,49 +52,57 @@ def rect(p):
         x = i[0] * s
         y = i[1] * s
         c = i[2].upper()
-        rect = pygame.Rect(x, y, s, s)
-        pygame.draw.rect(screen, getColor(c), rect, 1)
-        screen.fill(getColor(c), rect)
+        square = pygame.Rect(x, y, s, s)
+        pygame.draw.rect(screen, getColor(c), square, 1)
+        screen.fill(getColor(c), square)
+
+def connect():
+    xy = 0, 0
+    while xy[0] < 100 and xy[1] < 100:
+        for g in karta[xy][1:]:
+            newC = getColor((karta[g[:2]][0]).upper())
+            pygame.draw.line(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2), (g[0] * s + s / 2, g[1] * s + s / 2), 1)
+        xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
 def getColor(c):
     # terr
     if c == 'T':
-        return 13, 77, 18
+        return [13, 77, 18]
     elif c == 'V':
-        return 14, 113, 194
+        return [14, 113, 194]
     elif c == 'G':
-        return 77, 66, 26
+        return [77, 66, 26]
     elif c == 'M':
         return 212, 175, 42
     elif c == 'B':
-        return 125, 125, 122
+        return [125, 125, 122]
 
     # NPCs
     elif c in ('0', 'i', 'w', 'c', 'o'):
-        return 214, 92, 11
+        return [214, 92, 11]
     elif c == '1':
-        return 177, 204, 41
+        return [177, 204, 41]
     elif c in ('2', 's'):
-        return 255, 0, 153
+        return [255, 0, 153]
     elif c == '3':  # lives in the corresponding building
-        return 69, 209, 200
+        return [69, 209, 200]
 
     # Iron
     elif c == 'I':  # maybe invisible at all time
-        return 165, 198, 204
+        return [165, 198, 204]
     elif c == 'O':
-        return 48, 111, 122
+        return [48, 111, 122]
 
     # sword
     elif c == 'S':  # maybe invisible at all time
-        return 255, 0, 0
+        return [255, 0, 0]
 
     # wood
     elif c == 'W':
-        return 158, 75, 44
+        return [158, 75, 44]
     elif c == 'C':  # maybe invisible at all time
-        return 22, 22, 22
+        return [22, 22, 22]
 
 
 def drawMap():
@@ -110,15 +118,18 @@ def drawMap():
 
 
 def updateMap():
-    global xy1
-    global xy2
     p = []
+    agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
+
     for g in karta:
         p.append(g + (karta[g][0],))
+
     rect(p)
 
-    player([(xy1[0], xy1[1], 'V')])
-    player([(xy2[0], xy2[1], 'V')])
+    player(agents)
+
+    connect()
+
     pygame.display.flip()
 
 
@@ -184,4 +195,4 @@ while True:
         karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
         #print(karta[int(xy2[0]), int(xy2[1])][0])
     updateMap()
-    pygame.display.flip()
+    input()
