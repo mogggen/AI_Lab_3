@@ -30,9 +30,10 @@ WIDTH, HEIGHT = 1000, 1000
 s = 10
 
 xy1 = 10.3, 10.3
-xy2 = 10.0, 10.3
+xy2 = 10.0, 9.3
 
-karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
+
+
 
 # destination
 def player(p):
@@ -56,12 +57,13 @@ def rect(p):
         pygame.draw.rect(screen, getColor(c), square, 1)
         screen.fill(getColor(c), square)
 
+
 def connect():
     xy = 0, 0
     while xy[0] < 100 and xy[1] < 100:
         for g in karta[xy][1:]:
             newC = getColor((karta[g[:2]][0]).upper())
-            pygame.draw.line(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2), (g[0] * s + s / 2, g[1] * s + s / 2), 1)
+            pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2), (g[0] * s + s / 2, g[1] * s + s / 2), 1)
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
@@ -105,22 +107,10 @@ def getColor(c):
         return [22, 22, 22]
 
 
-def drawMap():
-    global karta
-    nodes = []
-
-    for e in explorers:
-        nodes += [(e[0] * s, e[1] * s, karta[e][0][0])]
-        # for c in karta[e][1:]:
-        #    if renderPos(c) in nodes:
-        #        nodes += renderPos(c)
-    rect(nodes)
-
-
 def updateMap():
     p = []
     agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
-
+    karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
     for g in karta:
         p.append(g + (karta[g][0],))
 
@@ -128,7 +118,7 @@ def updateMap():
 
     player(agents)
 
-    connect()
+    #connect()
 
     pygame.display.flip()
 
@@ -195,4 +185,3 @@ while True:
         karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
         #print(karta[int(xy2[0]), int(xy2[1])][0])
     updateMap()
-    input()
