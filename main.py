@@ -76,7 +76,7 @@ def getColor(c):
     elif c == 'G':
         return [77, 66, 26]
     elif c == 'M':
-        return 212, 175, 42
+        return [212, 175, 42]
     elif c == 'B':
         return [125, 125, 122]
 
