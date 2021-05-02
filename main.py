@@ -22,7 +22,7 @@ karta = terrain.InitMap()
 terr = 'V', 'B', 'G', 'M', 'T'
 buil = '4', '5', '6', '7'  # placed on 'M'
 
-NPCs = '0', '1', '2', '3'  # can't share position
+NPCs = '0', '1', '2', '3'  # can share position
 mats = 'O', 'W'
 prod = 'I', 'C'  # maybe invisible at all time
 
@@ -31,7 +31,7 @@ s = 10
 
 xy1 = 10.3, 10.3
 xy2 = 10.0, 9.3
-
+# more than two agents are only necessarily when scaling the simulation (divide and conquer)
 
 
 

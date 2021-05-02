@@ -1,4 +1,3 @@
-from perlin_noise import PerlinNoise
 import math
 import time
 import random as R
@@ -57,11 +56,12 @@ def walkableEdges():
             if not 0 <= pos[0] < 100 or not 0 <= pos[1] < 100 or karta[pos] in unwalkables:
                 continue
 
-            v = 1
             if karta[pos][0] in walkables:
-
+                v = 1
                 if not (n[0] + n[1]) % 2:
                     v = round((2 * v ** 2) ** .5, 1)
+                    if karta[pos][0] not in walkables[0]:
+                        v = round(2 * v, 1)
                 karta[g] += [pos + (v,)]
 
 
