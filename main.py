@@ -29,7 +29,7 @@ prod = 'I', 'C'  # maybe invisible at all time
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 
-xy1 = 10.3, 10.3
+xy1 = 15.3, 15.3
 xy2 = 10.0, 9.3
 # more than two agents are only necessarily when scaling the simulation (divide and conquer)
 
@@ -172,16 +172,24 @@ diagonalDelay = 0
 # loop
 while True:
     if time.time() > straightDelay:
+        if (karta[int(xy1[0]), int(xy1[1])][0]).upper() not in (terrain.walkables[0]).upper():
+            straightDelay = .1
+        else:
+            straightDelay = 2.0
         xy1 = round(xy1[0] + .1, 1), xy1[1]
         player([(xy1[0], xy1[1], 'V')])
-        straightDelay = time.time() + .1
+        straightDelay = time.time() + straightDelay
         karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
         #print(karta[int(xy1[0]), int(xy1[1])][0])
 
     if time.time() > diagonalDelay:
+        if (karta[int(xy2[0]), int(xy2[1])][0]).upper() not in (terrain.walkables[0]).upper():
+            diagonalDelay = .14
+        else:
+            diagonalDelay = 2.80
         xy2 = round(xy2[0] + .1, 1), round(xy2[1] + .1, 1)
         player([(xy2[0], xy2[1], 'V')])
-        diagonalDelay = time.time() + .14
+        diagonalDelay = time.time() + diagonalDelay
         karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
         #print(karta[int(xy2[0]), int(xy2[1])][0])
     updateMap()
