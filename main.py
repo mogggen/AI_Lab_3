@@ -1,5 +1,6 @@
 import terrain
 import agent
+import color
 import pygame
 import time
 
@@ -42,8 +43,8 @@ def player(p):
         y = int(i[1] * s)
         c = i[2].upper()
         square = pygame.Rect(x, y, 2, 2)
-        pygame.draw.rect(screen, getColor(c), square, 1)
-        screen.fill(getColor(c), square)
+        pygame.draw.rect(screen, color.terrainColor[c], square, 1)
+        screen.fill(color.terrainColor[c], square)
 
 
 def rect(p):
@@ -54,8 +55,8 @@ def rect(p):
         y = i[1] * s
         c = i[2].upper()
         square = pygame.Rect(x, y, s, s)
-        pygame.draw.rect(screen, getColor(c), square, 1)
-        screen.fill(getColor(c), square)
+        pygame.draw.rect(screen, color.terrainColor[c], square, 1)
+        screen.fill(color.terrainColor[c], square)
 
 
 def connect():
@@ -65,46 +66,6 @@ def connect():
             newC = getColor((karta[g[:2]][0]).upper())
             pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2), (g[0] * s + s / 2, g[1] * s + s / 2), 1)
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
-
-
-def getColor(c):
-    # terr
-    if c == 'T':
-        return [13, 77, 18]
-    elif c == 'V':
-        return [14, 113, 194]
-    elif c == 'G':
-        return [77, 66, 26]
-    elif c == 'M':
-        return [212, 175, 42]
-    elif c == 'B':
-        return [125, 125, 122]
-
-    # NPCs
-    elif c in ('0', 'i', 'w', 'c', 'o'):
-        return [214, 92, 11]
-    elif c == '1':
-        return [177, 204, 41]
-    elif c in ('2', 's'):
-        return [255, 0, 153]
-    elif c == '3':  # lives in the corresponding building
-        return [69, 209, 200]
-
-    # Iron
-    elif c == 'I':  # maybe invisible at all time
-        return [165, 198, 204]
-    elif c == 'O':
-        return [48, 111, 122]
-
-    # sword
-    elif c == 'S':  # maybe invisible at all time
-        return [255, 0, 0]
-
-    # wood
-    elif c == 'W':
-        return [158, 75, 44]
-    elif c == 'C':  # maybe invisible at all time
-        return [22, 22, 22]
 
 
 def updateMap():
@@ -118,53 +79,10 @@ def updateMap():
 
     player(agents)
 
-    #connect()
+    # connect()
 
     pygame.display.flip()
 
-
-def reveal(g, first=False):
-    nodes = []
-    r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
-    for n in r:
-        pos = g[0] + n[0], g[1] + n[1]
-        if not 0 <= pos[0] < 100 or not 0 < pos[1] < 100:
-            continue
-        # finalVersion = karta[g][0][1] == NPCs[not first]
-
-        if karta[g][0][1] in (NPCs[1], (NPCs[0],)[:first]):
-            if (pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper()) not in nodes:
-                nodes += [(pos[0] * s, pos[1] * s, str(karta[pos][0][1]).upper())]
-            karta[pos][0] = str(karta[pos][0][0]).upper() + karta[pos][0][1]
-    return nodes
-
-
-#drawMap()
-
-
-def move(pos, to):
-    # if time.time()
-
-    rect(reveal(to))
-    # drawMap()
-
-
-# Grade
-# 200 st '*C'
-def tick():
-    for _ in range(len(workers)):
-        pos = explorers.pop(0)
-        to = terrain.R.choice(karta[pos][1:])
-        if 0 <= to[0] < 100 and 0 <= to[1] < 100:
-            move(pos, to)
-        explorers.append(to)
-
-    for _ in range(len(explorers)):
-        pos = explorers.pop(0)
-        to = terrain.R.choice(karta[pos][1:])
-        if 0 <= to[0] < 100 and 0 <= to[1] < 100:
-            move(pos, to)
-        explorers.append(to)
 
 
 straightDelay = 0
