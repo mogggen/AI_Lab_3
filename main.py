@@ -4,6 +4,8 @@ import color
 import pygame
 import time
 
+r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
+
 workers = []  # '0' # no clue
 explorers = []  # '1' 3-12 maybe??
 craftsmen = []  # '3'
@@ -19,16 +21,20 @@ class Land:
         self.terrain = terrainEnum
         self.closed = False
         self.opened = False
+        self.parent = None
+
+
 lands = []
 karta = terrain.InitMap()
 
 
 terr = 'V', 'B', 'G', 'M', 'T'
-buil = '4', '5', '6', '7'  # placed on 'M'
+buil = '4',  # placed on 'M'
 
 for sn in karta:
     lands.append(Land(sn, karta[sn][0]))
-input(lands)
+input(lands[0].pos)
+print(lands[0].closed, lands[0].opened)
 
 NPCs = '0', '1', '2', '3'  # can share position
 mats = 'O', 'W'
@@ -45,7 +51,9 @@ xy2 = 10.0, 9.3
 
 # destination
 def player(p):
+    print(p)
     for i in p:
+        #print(i)
         x = int(i[0] * s)
         y = int(i[1] * s)
         c = i[2].upper()
@@ -77,7 +85,7 @@ def connect():
 
 def updateMap():
     p = []
-    agents = agent.Agent(xy1[0], xy1[1])
+    agents = [agent.Agent(xy1)]
     #agents = [(xy1[0], xy1[1], 'V')]#, (xy2[0], xy2[1], 'V')]
     karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
     for g in karta:
@@ -85,14 +93,20 @@ def updateMap():
 
     rect(p)
 
-    player(agents)
+    player([agents[0].pos + ('V',)])
 
     if agents[0].timer < time.time():
         agents[0].timer = time.time() + .1
-        if len(trees):
-            agent.goalPos = trees.pop(0)
-        for i in range(9):
-            n = p.X - 1 + i % 3, p.Y - 1 + i / 3 # p is agent
+        if agents[0].goalPos == (-1, -1):
+            if len(trees):
+                agents[0].goalPos = trees.pop(0)
+            else:
+                agents[0].changeState(fsm.baseState)
+        else:
+            for n in r:
+                lands[agents[0].pos[0]].closed
+
+
 
     # connect()
 

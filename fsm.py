@@ -1,7 +1,6 @@
 import enums
 import pathfinding
 import time
-import main
 
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 

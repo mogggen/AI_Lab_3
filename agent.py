@@ -1,7 +1,5 @@
-import fsm
 import enums
-
-agents = []
+import fsm
 
 
 class Agent:
@@ -12,7 +10,7 @@ class Agent:
         self.goalPos = -1, -1
 
         self.agentType = enums.AgentEnum.WORKER
-        self.state = self.changeState(fsm.BaseState())
+        self.state = fsm.BaseState()
         self.timer = 0
         self.holding = enums.ItemEnum.none
 
