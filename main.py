@@ -9,19 +9,26 @@ explorers = []  # '1' 3-12 maybe??
 craftsmen = []  # '3'
 
 trees = []  # 'T', yields 5 'W' after 30 seconds.
-ironOre = []  # 'O', 'o' when carried.
-
-wood = []  # 'W', 'w' when carried.
-charCole = []  # 'C', 'c' when carried.
-ironIngots = []  # 'I', 'i' when carried.
+#ironOre = []  # 'O', 'o' when carried.
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 1000))
-
+class Land:
+    def __init__(self, pos, terrainEnum):
+        self.pos = pos
+        self.terrain = terrainEnum
+        self.closed = False
+        self.opened = False
+lands = []
 karta = terrain.InitMap()
+
 
 terr = 'V', 'B', 'G', 'M', 'T'
 buil = '4', '5', '6', '7'  # placed on 'M'
+
+for sn in karta:
+    lands.append(Land(sn, karta[sn][0]))
+input(lands)
 
 NPCs = '0', '1', '2', '3'  # can share position
 mats = 'O', 'W'
@@ -70,7 +77,8 @@ def connect():
 
 def updateMap():
     p = []
-    agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
+    agents = agent.Agent(xy1[0], xy1[1])
+    #agents = [(xy1[0], xy1[1], 'V')]#, (xy2[0], xy2[1], 'V')]
     karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
     for g in karta:
         p.append(g + (karta[g][0],))
@@ -78,6 +86,13 @@ def updateMap():
     rect(p)
 
     player(agents)
+
+    if agents[0].timer < time.time():
+        agents[0].timer = time.time() + .1
+        if len(trees):
+            agent.goalPos = trees.pop(0)
+        for i in range(9):
+            n = p.X - 1 + i % 3, p.Y - 1 + i / 3 # p is agent
 
     # connect()
 
