@@ -63,7 +63,7 @@ def connect():
     xy = 0, 0
     while xy[0] < 100 and xy[1] < 100:
         for g in karta[xy][1:]:
-            newC = getColor((karta[g[:2]][0]).upper())
+            newC = color.terrainColor[(karta[g[:2]][0]).upper()]
             pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2), (g[0] * s + s / 2, g[1] * s + s / 2), 1)
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
