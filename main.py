@@ -1,8 +1,10 @@
+from enums import GoalEnum
 import terrain
 import agent
 import color
 import pygame
 import time
+import fsm
 
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
@@ -33,8 +35,6 @@ buil = '4',  # placed on 'M'
 
 for sn in karta:
     lands.append(Land(sn, karta[sn][0]))
-input(lands[0].pos)
-print(lands[0].closed, lands[0].opened)
 
 NPCs = '0', '1', '2', '3'  # can share position
 mats = 'O', 'W'
@@ -43,15 +43,17 @@ prod = 'I', 'C'  # maybe invisible at all time
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 
-xy1 = 15.3, 15.3
-xy2 = 10.0, 9.3
+xy1 = 15, 15
+xy2 = 10, 9
+
+subPos1 = 3, 3
+subPos2 = 0, 3
 # more than two agents are only necessarily when scaling the simulation (divide and conquer)
 
 
 
 # destination
 def player(p):
-    print(p)
     for i in p:
         #print(i)
         x = int(i[0] * s)
@@ -101,7 +103,7 @@ def updateMap():
             if len(trees):
                 agents[0].goalPos = trees.pop(0)
             else:
-                agents[0].changeState(fsm.baseState)
+                agents[0].changeState(fsm.BaseState)
         else:
             for n in r:
                 lands[agents[0].pos[0]].closed
@@ -122,7 +124,7 @@ while True:
         if (karta[int(xy1[0]), int(xy1[1])][0]).upper() not in (terrain.walkables[0]).upper():
             straightDelay = .1
         else:
-            straightDelay = 2.0
+            straightDelay = .2
         xy1 = round(xy1[0] + .1, 1), xy1[1]
         player([(xy1[0], xy1[1], 'V')])
         straightDelay = time.time() + straightDelay
@@ -133,7 +135,7 @@ while True:
         if (karta[int(xy2[0]), int(xy2[1])][0]).upper() not in (terrain.walkables[0]).upper():
             diagonalDelay = .14
         else:
-            diagonalDelay = 2.80
+            diagonalDelay = .28
         xy2 = round(xy2[0] + .1, 1), round(xy2[1] + .1, 1)
         player([(xy2[0], xy2[1], 'V')])
         diagonalDelay = time.time() + diagonalDelay

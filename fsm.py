@@ -2,6 +2,8 @@ import enums
 import pathfinding
 import time
 
+trees = []
+
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
 class BaseState:
@@ -12,19 +14,18 @@ class BaseState:
         pass
 
     def Exit(self, agent):
-        agent.changeState(IdleState)
+        pass
 
 
 class IdleState(BaseState):
     def Enter(self, agent):
-        agent.goalPos = main.trees.pop()
+        agent.goalPos = trees.pop()
         agent.changeState(MoveState)
 
 
 class MoveState(BaseState):
     def Enter(self, agent):
         agent.pathToGoal = pathfinding.getAstarPath(agent)[:-1]
-        GoalPosistion = agent.pathToGoal[-1]
 
     def Execute(self, agent):
         agent.move()
@@ -35,7 +36,7 @@ class ChoppingState(BaseState):
         agent.startTime = time.time() + 30
 
     def Execute(self, agent):
-        if time.time() >= agent.startTime:
+        if time.time() >= agent.timer:
             agent.holding = enums.ItemEnum.tree
             # don't carry it for now
             agent.changeState(MoveState)
