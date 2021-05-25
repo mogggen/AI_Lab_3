@@ -13,8 +13,8 @@ def getAstarPath(agent):
 
         pass
 
-def Astar(pos, start, end)
-start = agent.pos
+def Astar(pos, start, end):
+    start = agent.pos
 
 for n in r:
 
