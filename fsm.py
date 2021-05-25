@@ -3,8 +3,6 @@ import pathfinding
 import time
 import karta from main
 
-trees = []
-
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
 class BaseState:
@@ -15,18 +13,19 @@ class BaseState:
         pass
 
     def Exit(self, agent):
-        pass
+        agent.changeState(IdleState)
 
 
 class IdleState(BaseState):
     def Enter(self, agent):
-        agent.goalPos = trees.pop()
+        agent.goalPos = main.trees.pop()
         agent.changeState(MoveState)
 
 
 class MoveState(BaseState):
     def Enter(self, agent):
         agent.pathToGoal = pathfinding.getAstarPath(agent)[:-1]
+        GoalPosistion = agent.pathToGoal[-1]
 
     def Execute(self, agent):
         agent.move()
@@ -37,7 +36,7 @@ class ChoppingState(BaseState):
         agent.startTime = time.time() + 30
 
     def Execute(self, agent):
-        if time.time() >= agent.timer:
+        if time.time() >= agent.startTime:
             agent.holding = enums.ItemEnum.tree
             # don't carry it for now
             agent.changeState(MoveState)
