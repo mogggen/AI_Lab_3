@@ -25,7 +25,7 @@ class IdleState(BaseState):
 
 class MoveState(BaseState):
     def Enter(self, agent):
-        agent.pathToGoal = pathfinding.getAstarPath(agent)[:-1]
+        agent.pathToGoal = pathfinding.getAstarPath(agent)
 
     def Execute(self, agent):
         agent.move()
