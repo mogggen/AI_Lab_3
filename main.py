@@ -103,7 +103,7 @@ def updateMap():
             if len(trees):
                 agents[0].goalPos = trees.pop(0)
             else:
-                agents[0].changeState(fsm.BaseState)
+                agents[0].changeState(fsm.BaseState())
         else:
             for n in r:
                 lands[agents[0].pos[0]].closed
@@ -115,6 +115,16 @@ def updateMap():
     pygame.display.flip()
 
 
+
+def exploreDistrict():
+    # start with two agents: one worker, one explorer
+    #def moveTowardCenterOfSquare(fromNextSquareInPath):
+        
+
+    #popUpcomingPath(forAgentToTake)
+
+    #trees.append(newFoundTreesAsGoals)
+    pass
 
 straightDelay = 0
 diagonalDelay = 0
@@ -141,4 +151,7 @@ while True:
         diagonalDelay = time.time() + diagonalDelay
         karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
         #print(karta[int(xy2[0]), int(xy2[1])][0])
+
+    agent.agents[0].extend(calculatePath())
+
     updateMap()

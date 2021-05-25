@@ -1,6 +1,7 @@
 import enums
 import pathfinding
 import time
+import karta from main
 
 trees = []
 
