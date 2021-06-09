@@ -3,7 +3,7 @@ from enums import GoalEnum, AgentEnum, ItemEnum
 import terrain
 import color
 import pygame
-import time
+from time import time
 
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
@@ -28,6 +28,7 @@ class Land:
 class Agent:
     def __init__(self, pos):
         self.pos = pos
+        self.pathToGoal = []
         self.goalPos = None
 
         self.agentType = AgentEnum.WORKER
@@ -73,7 +74,7 @@ def player(p):
         x = i[0] * s
         y = i[1] * s
         c = i[2].upper()
-        square = pygame.Rect(x, y, 2, 2)
+        square = pygame.Rect(x + s // 2, y + s // 2, 2, 2)
         pygame.draw.rect(screen, color.terrainColor[c], square, 1)  # draw it here
         screen.fill(color.terrainColor[c], square)
 
@@ -127,29 +128,35 @@ def exploreDistrict():
     #trees.append(newFoundTreesAsGoals)
     pass
 
+
 straightDelay = 0
 diagonalDelay = 0
 # loop
 while True:
-    if time.time() > straightDelay:
+    print(time(), straightDelay)
+    if time() > straightDelay:
         if (karta[xy1][0]).upper() not in (terrain.walkables[0]).upper():
-            straightDelay += 10
+            straightDelay = 10
         else:
-            straightDelay += 20
-        xy1 = xy1[0] + 10, xy1[1]
+            straightDelay = 20
+        straightDelay = time() + straightDelay
+
+        xy1 = xy1[0] + 1, xy1[1]
         player([(xy1[0], xy1[1], 'V')])
-        straightDelay = time.time() + straightDelay
         karta[xy1][0] = (karta[xy1][0]).upper()
         #print(karta[xy1)][0])
 
-    if time.time() > diagonalDelay:
+    if time() > diagonalDelay:
         if (karta[xy2][0]).upper() not in (terrain.walkables[0]).upper():
-            diagonalDelay += 14
+            diagonalDelay = 14
         else:
-            diagonalDelay += 28
-        xy2 = xy2[0] + 10, xy2[1] + 10
+            diagonalDelay = 28
+        diagonalDelay = time() + diagonalDelay
+
+        xy2 = xy2[0] + 1, xy2[1] + 1
         player([(xy2[0], xy2[1], 'V')])
-        diagonalDelay = time.time() + diagonalDelay
-        karta[xy2][0] = (karta[xy2][0]).upper()
+        for n in r + ((0, 0),):
+            p2 = xy2[0] + n[0], xy2[1] + n[1]
+            karta[p2][0] = (karta[p2][0]).upper()
 
     updateMap()

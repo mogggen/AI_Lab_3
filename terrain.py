@@ -74,4 +74,3 @@ def placeAgents():
                 u = x + dx, y + dy
                 karta[u] = [karta[u][0].upper()]
             break
-    print(x, y)
