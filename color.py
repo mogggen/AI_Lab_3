@@ -12,4 +12,3 @@ agents = (
     (214, 92, 11),  # workers
     (177, 204, 41)  # builders
 )
-

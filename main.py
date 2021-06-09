@@ -1,3 +1,4 @@
+import pathfinding
 from enums import GoalEnum, AgentEnum, ItemEnum
 import terrain
 import color
@@ -10,54 +11,39 @@ workers = []  # '0' # no clue
 explorers = []  # '1' 3-12 maybe??
 craftsmen = []  # '3'
 
-trees = []  # 'T', yields 5 'W' after 30 seconds.
-#ironOre = []  # 'O', 'o' when carried.
+trees = []  # 'T', yields 1 'W' after 30 seconds.
+# ironOre = []  # 'O', 'o' when carried.
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 1000))
+
+
 class Land:
-    def __init__(self, pos, terrainEnum):
+    def __init__(self, pos, terrain_enum):
         self.pos = pos
-        self.terrain = terrainEnum
-        self.closed = False
-        self.opened = False
+        self.terrain = terrain_enum
         self.parent = None
 
 
 class Agent:
     def __init__(self, pos):
         self.pos = pos
-        self.sub = 4, 4
-        self.pathToGoal = []
-        self.goalPos = -1, -1
+        self.goalPos = None
 
         self.agentType = AgentEnum.WORKER
-        self.state = fsm.BaseState()
         self.timer = 0
         self.holding = ItemEnum.none
 
-    def changeState(self, newState):
-        self.state.Exit(self)
-        self.state = newState
-        self.state.Enter(self, newState)
-
-    # move from center to center # runs every execute
+    # move from center to center, runs every execute
     def move(self):
-        self.pathToGoal[-1]
-        # you have arrived at the neighbouring tile
-        if self.pos == self.pathToGoal[0] and self.sub == (4, 4):
-
-            self.pathToGoal.pop(0)
-
-            if not len(self.pathToGoal):
-                return
-            # find tree
-            # changeState ... (MoveToHQ)
+        if len(self.pathToGoal):
             return
+        # you have arrived at the neighbouring tile
+        if self.pos == self.pathToGoal[0]:
 
-        self.sub = self.pathToGoal[0][0] - self.pos[0], self.pathToGoal[0][1] - self.pos[0]
-        # is diagonal move
-        self.timer = karta[self.pos]
+            self.timer += pathfinding.moveCost(self.pos, self.pathToGoal.pop(0))
+            #if self.pathToGoal
+
 
 lands = []
 karta = terrain.InitMap()
@@ -68,8 +54,6 @@ buil = '4',  # placed on 'M'
 
 for sn in karta:
     lands.append(Land(sn, karta[sn][0]))
-input(lands[0].pos)
-print(lands[0].closed, lands[0].opened)
 
 NPCs = '0', '1', '2', '3'  # can share position
 mats = 'O', 'W'
@@ -78,22 +62,19 @@ prod = 'I', 'C'  # maybe invisible at all time
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 
-xy1 = 15.3, 15.3
-xy2 = 10.0, 9.3
+xy1 = 10, 10
+xy2 = 10, 10
 # more than two agents are only necessarily when scaling the simulation (divide and conquer)
-
 
 
 # destination
 def player(p):
-    print(p)
     for i in p:
-        #print(i)
-        x = int(i[0] * s)
-        y = int(i[1] * s)
+        x = i[0] * s
+        y = i[1] * s
         c = i[2].upper()
         square = pygame.Rect(x, y, 2, 2)
-        pygame.draw.rect(screen, color.terrainColor[c], square, 1)
+        pygame.draw.rect(screen, color.terrainColor[c], square, 1)  # draw it here
         screen.fill(color.terrainColor[c], square)
 
 
@@ -105,7 +86,7 @@ def rect(p):
         y = i[1] * s
         c = i[2].upper()
         square = pygame.Rect(x, y, s, s)
-        pygame.draw.rect(screen, color.terrainColor[c], square, 1)
+        pygame.draw.rect(screen, color.terrainColor[c], square, 1)  # draw it here
         screen.fill(color.terrainColor[c], square)
 
 
@@ -122,26 +103,13 @@ def updateMap():
     p = []
     agents = [Agent(xy1)]
     #agents = [(xy1[0], xy1[1], 'V')]#, (xy2[0], xy2[1], 'V')]
-    karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
+    karta[xy1][0] = (karta[xy1][0]).upper()
     for g in karta:
         p.append(g + (karta[g][0],))
 
     rect(p)
 
     player([agents[0].pos + ('V',)])
-
-    if agents[0].timer < time.time():
-        agents[0].timer = time.time() + .1
-        if agents[0].goalPos == (-1, -1):
-            if len(trees):
-                agents[0].goalPos = trees.pop(0)
-            else:
-                agents[0].changeState(fsm.baseState())
-        else:
-            for n in r:
-                lands[agents[0].pos[0]].closed
-
-
 
     # connect()
 
@@ -164,27 +132,24 @@ diagonalDelay = 0
 # loop
 while True:
     if time.time() > straightDelay:
-        if (karta[int(xy1[0]), int(xy1[1])][0]).upper() not in (terrain.walkables[0]).upper():
-            straightDelay = .1
+        if (karta[xy1][0]).upper() not in (terrain.walkables[0]).upper():
+            straightDelay += 10
         else:
-            straightDelay = 2.0
-        xy1 = round(xy1[0] + .1, 1), xy1[1]
+            straightDelay += 20
+        xy1 = xy1[0] + 10, xy1[1]
         player([(xy1[0], xy1[1], 'V')])
         straightDelay = time.time() + straightDelay
-        karta[int(xy1[0]), int(xy1[1])][0] = (karta[int(xy1[0]), int(xy1[1])][0]).upper()
-        #print(karta[int(xy1[0]), int(xy1[1])][0])
+        karta[xy1][0] = (karta[xy1][0]).upper()
+        #print(karta[xy1)][0])
 
     if time.time() > diagonalDelay:
-        if (karta[int(xy2[0]), int(xy2[1])][0]).upper() not in (terrain.walkables[0]).upper():
-            diagonalDelay = .14
+        if (karta[xy2][0]).upper() not in (terrain.walkables[0]).upper():
+            diagonalDelay += 14
         else:
-            diagonalDelay = 2.80
-        xy2 = round(xy2[0] + .1, 1), round(xy2[1] + .1, 1)
+            diagonalDelay += 28
+        xy2 = xy2[0] + 10, xy2[1] + 10
         player([(xy2[0], xy2[1], 'V')])
         diagonalDelay = time.time() + diagonalDelay
-        karta[int(xy2[0]), int(xy2[1])][0] = (karta[int(xy2[0]), int(xy2[1])][0]).upper()
-        #print(karta[int(xy2[0]), int(xy2[1])][0])
-
-    agent.agents[0].extend(calculatePath())
+        karta[xy2][0] = (karta[xy2][0]).upper()
 
     updateMap()
