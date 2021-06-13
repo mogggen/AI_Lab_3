@@ -12,7 +12,6 @@ explorers = []  # '1' 3-12 maybe??
 craftsmen = []  # '3'
 
 trees = []  # 'T', yields 1 'W' after 30 seconds.
-# ironOre = []  # 'O', 'o' when carried.
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 1000))
@@ -55,10 +54,6 @@ buil = '4',  # placed on 'M'
 
 for sn in karta:
     lands.append(Land(sn, karta[sn][0]))
-
-NPCs = '0', '1', '2', '3'  # can share position
-mats = 'O', 'W'
-prod = 'I', 'C'  # maybe invisible at all time
 
 WIDTH, HEIGHT = 1000, 1000
 s = 10
@@ -103,14 +98,13 @@ def connect():
 def updateMap():
     p = []
     agents = [Agent(xy1)]
-    #agents = [(xy1[0], xy1[1], 'V')]#, (xy2[0], xy2[1], 'V')]
-    karta[xy1][0] = (karta[xy1][0]).upper()
+    agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
     for g in karta:
         p.append(g + (karta[g][0],))
 
     rect(p)
 
-    player([agents[0].pos + ('V',)])
+    player(agents)
 
     # connect()
 
@@ -133,30 +127,30 @@ straightDelay = 0
 diagonalDelay = 0
 # loop
 while True:
-    print(time(), straightDelay)
     if time() > straightDelay:
-        if (karta[xy1][0]).upper() not in (terrain.walkables[0]).upper():
+        if (karta[xy1][0]).upper() in (terrain.walkables[0]).upper():
             straightDelay = 10
         else:
             straightDelay = 20
-        straightDelay = time() + straightDelay
 
         xy1 = xy1[0] + 1, xy1[1]
         player([(xy1[0], xy1[1], 'V')])
-        karta[xy1][0] = (karta[xy1][0]).upper()
-        #print(karta[xy1)][0])
+        for n in r + ((0, 0),):
+            p1 = xy1[0] + n[0], xy1[1] + n[1]
+            karta[p1][0] = (karta[p1][0]).upper()
+        straightDelay = time() + straightDelay
 
     if time() > diagonalDelay:
-        if (karta[xy2][0]).upper() not in (terrain.walkables[0]).upper():
+        if (karta[xy2][0]).upper() in (terrain.walkables[0]).upper():
             diagonalDelay = 14
         else:
             diagonalDelay = 28
-        diagonalDelay = time() + diagonalDelay
 
         xy2 = xy2[0] + 1, xy2[1] + 1
         player([(xy2[0], xy2[1], 'V')])
         for n in r + ((0, 0),):
             p2 = xy2[0] + n[0], xy2[1] + n[1]
             karta[p2][0] = (karta[p2][0]).upper()
+        diagonalDelay = time() + diagonalDelay
 
     updateMap()
