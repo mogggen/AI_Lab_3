@@ -9,20 +9,18 @@ class Node:
         self.parent = None
 
 
-def convertGraphToNodes(graph):
+def convertLandToNodes(graph):
     if not graph:
         return
     finish = None
     node_list = {}
     for g in graph:
-        if graph[g][0] == 'G':
+        if graph[g][0] == 'T':
             finish = g
             break
 
     for g in graph:
         node_list[g] = Node(round((((finish[0] - g[0]) ** 2 + (finish[1] - g[1]) ** 2) ** .5) * 10), graph[g][1:])
-        if graph[g][0] == 'S':
-            node_list[g].g = 0
 
     return node_list
 
@@ -31,8 +29,10 @@ def moveCost(parent, child):
     return 14 if ((parent[0] - child[0]) + (parent[1] - child[1])) % 2 == 0 else 10
 
 
-def aStar(graph, outOfTime, open_list=[], closed_list=[]):
-    node = 1, 1
+def aStar(graph, start, endTime):
+    closed_list = []
+    open_list = []
+    node = start
 
     open_list.append(node)
 

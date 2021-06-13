@@ -47,7 +47,7 @@ class Agent:
 
 lands = []
 karta = terrain.InitMap()
-
+startingPoint = terrain.placeAgents()
 
 terr = 'V', 'B', 'G', 'M', 'T'
 buil = '4',  # placed on 'M'
@@ -58,8 +58,8 @@ for sn in karta:
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 
-xy1 = 10, 10
-xy2 = 10, 10
+xy1 = startingPoint[:]
+xy2 = startingPoint[:]
 # more than two agents are only necessarily when scaling the simulation (divide and conquer)
 
 

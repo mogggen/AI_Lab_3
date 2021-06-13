@@ -41,7 +41,7 @@ def InitMap():
     for y in enumerate(h):
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]]
-    placeAgents()
+    # placeAgents()
     walkableEdges()
     return karta
 
@@ -73,4 +73,4 @@ def placeAgents():
             for dx, dy in r:
                 u = x + dx, y + dy
                 karta[u] = [karta[u][0].upper()]
-            break
+            return x, y
