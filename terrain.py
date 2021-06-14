@@ -46,6 +46,13 @@ def InitMap():
     return karta
 
 
+def placeTrees(land):
+    global karta
+    for g in karta:
+        if karta[g][0] == 't':
+            karta[g][0] = 'm'.upper()
+            land.trees = [29, 43, 75, 54, 31]
+
 def walkableEdges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     global karta

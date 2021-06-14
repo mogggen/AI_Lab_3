@@ -11,16 +11,14 @@ workers = []  # '0' # no clue
 explorers = []  # '1' 3-12 maybe??
 craftsmen = []  # '3'
 
-trees = []  # 'T', yields 1 'W' after 30 seconds.
-
 pygame.init()
 screen = pygame.display.set_mode((1000, 1000))
 
 
 class Land:
-    def __init__(self, pos, terrain_enum):
-        self.pos = pos
-        self.terrain = terrain_enum
+    def __init__(self, terrain_enum, trees=0):
+        self.terrain = terrain_enum  # 'T', yields 1 'W' after 30 seconds.
+        self.trees = trees
         self.parent = None
 
 
@@ -40,26 +38,31 @@ class Agent:
             return
         # you have arrived at the neighbouring tile
         if self.pos == self.pathToGoal[0]:
-
             self.timer += pathfinding.moveCost(self.pos, self.pathToGoal.pop(0))
-            #if self.pathToGoal
+            # if self.pathToGoal
 
 
-lands = []
+lands = {}
 karta = terrain.InitMap()
 startingPoint = terrain.placeAgents()
 
 terr = 'V', 'B', 'G', 'M', 'T'
-buil = '4',  # placed on 'M'
+buildings = 'C',  # placed on 'M'
 
 for sn in karta:
-    lands.append(Land(sn, karta[sn][0]))
+    lands[sn] = Land(karta[sn][0])
+    if karta[sn][0].upper() == terr[-1]:
+        lands[sn].terrain = terr[-2]
+        lands[sn].trees = 5
+input()
 
 WIDTH, HEIGHT = 1000, 1000
 s = 10
 
 xy1 = startingPoint[:]
 xy2 = startingPoint[:]
+
+
 # more than two agents are only necessarily when scaling the simulation (divide and conquer)
 
 
@@ -86,18 +89,19 @@ def rect(p):
         screen.fill(color.terrainColor[c], square)
 
 
-def connect():
+def draw_connections():
     xy = 0, 0
     while xy[0] < 100 and xy[1] < 100:
         for g in karta[xy][1:]:
             newC = color.terrainColor[(karta[g[:2]][0]).upper()]
-            pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2), (g[0] * s + s / 2, g[1] * s + s / 2), 1)
+            pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2),
+                               (g[0] * s + s / 2, g[1] * s + s / 2), 1)
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
-def updateMap():
+def update_map():
     p = []
-    agents = [Agent(xy1)]
+    agents = [Agent(xy1)]  # TODO actually list the agent, and remove the hardcoded ones
     agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
     for g in karta:
         p.append(g + (karta[g][0],))
@@ -106,20 +110,18 @@ def updateMap():
 
     player(agents)
 
-    # connect()
+    draw_connections()
 
     pygame.display.flip()
 
 
-
 def exploreDistrict():
     # start with two agents: one worker, one explorer
-    #def moveTowardCenterOfSquare(fromNextSquareInPath):
-        
+    # def moveTowardCenterOfSquare(fromNextSquareInPath):
 
-    #popUpcomingPath(forAgentToTake)
+    # popUpcomingPath(forAgentToTake)
 
-    #trees.append(newFoundTreesAsGoals)
+    # trees.append(newFoundTreesAsGoals)
     pass
 
 
@@ -127,7 +129,7 @@ straightDelay = 0
 diagonalDelay = 0
 # loop
 while True:
-    if time() > straightDelay:
+    if time():  # > straightDelay:
         if (karta[xy1][0]).upper() in (terrain.walkables[0]).upper():
             straightDelay = 10
         else:
@@ -140,7 +142,7 @@ while True:
             karta[p1][0] = (karta[p1][0]).upper()
         straightDelay = time() + straightDelay
 
-    if time() > diagonalDelay:
+    if time():  # > diagonalDelay:
         if (karta[xy2][0]).upper() in (terrain.walkables[0]).upper():
             diagonalDelay = 14
         else:
@@ -153,4 +155,4 @@ while True:
             karta[p2][0] = (karta[p2][0]).upper()
         diagonalDelay = time() + diagonalDelay
 
-    updateMap()
+    update_map()

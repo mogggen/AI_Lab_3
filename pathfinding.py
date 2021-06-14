@@ -12,15 +12,10 @@ class Node:
 def convertLandToNodes(graph):
     if not graph:
         return
-    finish = None
     node_list = {}
-    for g in graph:
-        if graph[g][0] == 'T':
-            finish = g
-            break
 
     for g in graph:
-        node_list[g] = Node(round((((finish[0] - g[0]) ** 2 + (finish[1] - g[1]) ** 2) ** .5) * 10), graph[g][1:])
+        node_list[g] = Node()
 
     return node_list
 
@@ -28,7 +23,7 @@ def convertLandToNodes(graph):
 def moveCost(parent, child):
     return 14 if ((parent[0] - child[0]) + (parent[1] - child[1])) % 2 == 0 else 10
 
-
+# shan't be called by workers if none of them are holding tree or none of them can see a tree
 def aStar(graph, start, endTime):
     closed_list = []
     open_list = []
