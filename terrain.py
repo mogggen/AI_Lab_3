@@ -54,9 +54,9 @@ def findTrees(land):
         drawTrees(g)
 
 
-def drawTrees(pos: tuple, amount: list):
+def drawTrees(pos: tuple):
     loc = [29, 43, 75, 54, 31]
-    for T in amount:
+    for T in loc:
         pos[0] * 10 + T // 10
 
 def walkableEdges():
