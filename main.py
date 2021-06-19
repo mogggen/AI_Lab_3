@@ -1,3 +1,4 @@
+import enums
 import pathfinding
 from enums import GoalEnum, AgentEnum, ItemEnum
 import terrain
@@ -23,7 +24,7 @@ class Land:
 
 
 class Agent:
-    def __init__(self, pos):
+    def __init__(self, pos, agentEnum=enums.AgentEnum.WORKER):
         self.pos = pos
         self.pathToGoal = []
         self.goalPos = None
@@ -54,7 +55,6 @@ for sn in karta:
     if karta[sn][0].upper() == terr[-1]:
         lands[sn].terrain = terr[-2]
         lands[sn].trees = 5
-input()
 
 WIDTH, HEIGHT = 1000, 1000
 s = 10
@@ -69,6 +69,7 @@ xy2 = startingPoint[:]
 # destination
 def player(p):
     for i in p:
+        print(i)
         x = i[0] * s
         y = i[1] * s
         c = i[2].upper()
@@ -101,8 +102,9 @@ def draw_connections():
 
 def update_map():
     p = []
-    agents = [Agent(xy1)]  # TODO actually list the agent, and remove the hardcoded ones
-    agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
+    agents = [Agent(xy1, enums.AgentEnum.WORKER),
+              Agent(xy2, enums.AgentEnum.SCOUT)]  # TODO actually list the agent, and remove the hardcoded ones
+    # agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
     for g in karta:
         p.append(g + (karta[g][0],))
 
@@ -110,7 +112,7 @@ def update_map():
 
     player(agents)
 
-    draw_connections()
+    # draw_connections()
 
     pygame.display.flip()
 

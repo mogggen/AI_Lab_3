@@ -41,17 +41,23 @@ def InitMap():
     for y in enumerate(h):
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]]
-    # placeAgents()
     walkableEdges()
     return karta
 
 
-def placeTrees(land):
+def findTrees(land):
     global karta
     for g in karta:
         if karta[g][0] == 't':
             karta[g][0] = 'm'.upper()
-            land.trees = [29, 43, 75, 54, 31]
+            land.trees = 5  #
+        drawTrees(g)
+
+
+def drawTrees(pos: tuple, amount: list):
+    loc = [29, 43, 75, 54, 31]
+    for T in amount:
+        pos[0] * 10 + T // 10
 
 def walkableEdges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
