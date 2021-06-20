@@ -8,7 +8,11 @@ terrainColor = {
     'B': (125, 125, 122)
 }
 
-agents = (
-    (214, 92, 11),  # workers
-    (177, 204, 41)  # builders
+agentColor = (
+    (0xc0, 0xc0, 0xc0),  # workers
+    (14, 113, 194),  # try this scout color?!!?!
+    (177, 204, 41),  # builders
+    (214, 92, 11)  # millers
 )
+
+buildColor = 0xb2, 0x22, 0x22  # coalMill

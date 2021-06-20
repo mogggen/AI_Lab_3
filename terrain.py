@@ -50,14 +50,17 @@ def findTrees(land):
     for g in karta:
         if karta[g][0] == 't':
             karta[g][0] = 'm'.upper()
-            land.trees = 5  #
-        drawTrees(g)
+            land.trees = 5
+        drawTrees(g, land.trees)
 
 
-def drawTrees(pos: tuple):
+def drawTrees(pos: tuple, amount):
+    if not amount:
+        return
     loc = [29, 43, 75, 54, 31]
-    for T in loc:
-        pos[0] * 10 + T // 10
+    for T in loc[:amount]:
+        pos[0] * 10 + T // 10, pos[1] * 10 + T % 10
+
 
 def walkableEdges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)

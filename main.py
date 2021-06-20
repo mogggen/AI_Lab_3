@@ -1,6 +1,6 @@
 import enums
 import pathfinding
-from enums import GoalEnum, AgentEnum, ItemEnum
+from enums import AgentEnum, ItemEnum
 import terrain
 import color
 import pygame
@@ -8,32 +8,33 @@ from time import time
 
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
-workers = []  # '0' # no clue
-explorers = []  # '1' 3-12 maybe??
-craftsmen = []  # '3'
+charCoal = 0
+
+# workers = []  # the rest
+# explorers = []  # 3
+# craftsmen = []  # 1 total
 
 pygame.init()
-screen = pygame.display.set_mode((1000, 1000))
+WIDTH, HEIGHT = 1000, 1000
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
 class Land:
     def __init__(self, terrain_enum, trees=0):
-        self.terrain = terrain_enum  # 'T', yields 1 'W' after 30 seconds.
-        self.trees = trees
-        self.parent = None
+        self.terrain = terrain_enum
+        self.trees = trees  # yields 1 tree after 30 seconds
 
 
 class Agent:
-    def __init__(self, pos, agentEnum=enums.AgentEnum.WORKER):
+    def __init__(self, pos, agentEnum=AgentEnum.WORKER):
         self.pos = pos
         self.pathToGoal = []
-        self.goalPos = None
 
-        self.agentType = AgentEnum.WORKER
+        self.agentType = agentEnum
         self.timer = 0
         self.holding = ItemEnum.none
 
-    # move from center to center, runs every execute
+    # move from center to center, runs once every pathfinding epoch
     def move(self):
         if len(self.pathToGoal):
             return
@@ -46,6 +47,7 @@ class Agent:
 lands = {}
 karta = terrain.InitMap()
 startingPoint = terrain.placeAgents()
+agents = [Agent(startingPoint[:], enums.AgentEnum.WORKER), Agent(startingPoint[:], enums.AgentEnum.SCOUT)]
 
 terr = 'V', 'B', 'G', 'M', 'T'
 buildings = 'C',  # placed on 'M'
@@ -56,31 +58,36 @@ for sn in karta:
         lands[sn].terrain = terr[-2]
         lands[sn].trees = 5
 
-WIDTH, HEIGHT = 1000, 1000
 s = 10
-
-xy1 = startingPoint[:]
-xy2 = startingPoint[:]
 
 
 # more than two agents are only necessarily when scaling the simulation (divide and conquer)
 
 
 # destination
-def player(p):
+def draw_players(p):
     for i in p:
-        print(i)
-        x = i[0] * s
-        y = i[1] * s
-        c = i[2].upper()
+        x, y = i.pos[0] * s + s // 2, i.pos[1] * s + s // 2
+        # what type of agent should be rendered
+        if i.agentType == enums.AgentEnum.WORKER:
+            c = color.agentColor[0]
+        elif i.agentType == enums.AgentEnum.SCOUT:
+            c = color.agentColor[1]
+        elif i.agentType == enums.AgentEnum.BUILDER:
+            c = color.agentColor[2]
+        elif i.agentType == enums.AgentEnum.MILLER:
+            c = color.agentColor[3]
+        else:
+            print(i)
+            raise NotImplementedError
         square = pygame.Rect(x + s // 2, y + s // 2, 2, 2)
-        pygame.draw.rect(screen, color.terrainColor[c], square, 1)  # draw it here
-        screen.fill(color.terrainColor[c], square)
+        pygame.draw.rect(screen, c, square, 1)
+        screen.fill(c, square)
 
 
 def rect(p):
     for i in p:
-        if str.islower(i[2]):
+        if i[2].islower():
             continue
         x = i[0] * s
         y = i[1] * s
@@ -101,60 +108,45 @@ def draw_connections():
 
 
 def update_map():
+    global agents
+
     p = []
-    agents = [Agent(xy1, enums.AgentEnum.WORKER),
-              Agent(xy2, enums.AgentEnum.SCOUT)]  # TODO actually list the agent, and remove the hardcoded ones
-    # agents = [(xy1[0], xy1[1], 'V'), (xy2[0], xy2[1], 'V')]
     for g in karta:
         p.append(g + (karta[g][0],))
 
+    for l in lands:
+        terrain.drawTrees(l, lands[l].trees)
+
     rect(p)
 
-    player(agents)
+    draw_players(agents)
 
     # draw_connections()
 
     pygame.display.flip()
 
 
-def exploreDistrict():
-    # start with two agents: one worker, one explorer
-    # def moveTowardCenterOfSquare(fromNextSquareInPath):
-
-    # popUpcomingPath(forAgentToTake)
-
-    # trees.append(newFoundTreesAsGoals)
-    pass
-
-
-straightDelay = 0
-diagonalDelay = 0
+previousDeltaCalculationTime = 0
+shortestTimeSpanRemaining = 0
+nodesToTraverse = pathfinding.convertLandToNodes(lands)
 # loop
-while True:
-    if time():  # > straightDelay:
-        if (karta[xy1][0]).upper() in (terrain.walkables[0]).upper():
-            straightDelay = 10
-        else:
-            straightDelay = 20
+while charCoal < 200:
+    shortestTimeSpanRemaining = min(agents, key=lambda t: t.timer).timer  # to avoid race conditions
+    for a in agents:
+        if time() > a.timer:
+            if a.agentType in (AgentEnum.WORKER, AgentEnum.SCOUT):
+                if a.pathToGoal:
+                    a.pos = a.pathToGoal.pop()
+                    a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0]) * (1 + bool(
+                        (karta[a.pos][0]).upper() in (
+                        terrain.walkables[0]).upper()))
+                else:
+                    a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeSpanRemaining)
 
-        xy1 = xy1[0] + 1, xy1[1]
-        player([(xy1[0], xy1[1], 'V')])
-        for n in r + ((0, 0),):
-            p1 = xy1[0] + n[0], xy1[1] + n[1]
-            karta[p1][0] = (karta[p1][0]).upper()
-        straightDelay = time() + straightDelay
-
-    if time():  # > diagonalDelay:
-        if (karta[xy2][0]).upper() in (terrain.walkables[0]).upper():
-            diagonalDelay = 14
-        else:
-            diagonalDelay = 28
-
-        xy2 = xy2[0] + 1, xy2[1] + 1
-        player([(xy2[0], xy2[1], 'V')])
-        for n in r + ((0, 0),):
-            p2 = xy2[0] + n[0], xy2[1] + n[1]
-            karta[p2][0] = (karta[p2][0]).upper()
-        diagonalDelay = time() + diagonalDelay
+                if a.agentType == AgentEnum.SCOUT:
+                    for n in r + ((0, 0),):
+                        neigh = a.pos[0] + n[0], a.pos[1] + n[1]
+                        karta[neigh][0] = (karta[neigh][0]).upper()
+            a.timer = time() + a.timer
 
     update_map()
