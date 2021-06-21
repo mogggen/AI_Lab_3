@@ -34,17 +34,9 @@ class Agent:
         self.timer = 0
         self.holding = ItemEnum.none
 
-    # move from center to center, runs once every pathfinding epoch
-    def move(self):
-        if len(self.pathToGoal):
-            return
-        # you have arrived at the neighbouring tile
-        if self.pos == self.pathToGoal[0]:
-            self.timer += pathfinding.moveCost(self.pos, self.pathToGoal.pop(0))
-            # if self.pathToGoal
-
 
 lands = {}
+discovered = {}
 karta = terrain.InitMap()
 startingPoint = terrain.placeAgents()
 agents = [Agent(startingPoint[:], enums.AgentEnum.WORKER), Agent(startingPoint[:], enums.AgentEnum.SCOUT)]
@@ -52,11 +44,11 @@ agents = [Agent(startingPoint[:], enums.AgentEnum.WORKER), Agent(startingPoint[:
 terr = 'V', 'B', 'G', 'M', 'T'
 buildings = 'C',  # placed on 'M'
 
-for sn in karta:
-    lands[sn] = Land(karta[sn][0])
-    if karta[sn][0].upper() == terr[-1]:
-        lands[sn].terrain = terr[-2]
-        lands[sn].trees = 5
+for L in karta:
+    lands[L] = Land(karta[L][0])
+    if karta[L][0].upper() == terr[-1]:
+        lands[L].terrain = terr[-2]
+        lands[L].trees = 5
 
 s = 10
 
@@ -107,17 +99,20 @@ def draw_connections():
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
+
+
 def update_map():
+    global discovered
     global agents
 
-    p = []
+    for L in lands:
+        terrain.drawTrees(L, lands[L].trees)
+
+    # find trees
     for g in karta:
-        p.append(g + (karta[g][0],))
-
-    for l in lands:
-        terrain.drawTrees(l, lands[l].trees)
-
-    rect(p)
+        if karta[g][0].isupper():
+            discovered[g] = karta[g][0]
+        rect(discovered[g] + (karta[g][0],))
 
     draw_players(agents)
 
@@ -129,6 +124,8 @@ def update_map():
 previousDeltaCalculationTime = 0
 shortestTimeSpanRemaining = 0
 nodesToTraverse = pathfinding.convertLandToNodes(lands)
+
+
 # loop
 while charCoal < 200:
     shortestTimeSpanRemaining = min(agents, key=lambda t: t.timer).timer  # to avoid race conditions
@@ -139,8 +136,9 @@ while charCoal < 200:
                     a.pos = a.pathToGoal.pop()
                     a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0]) * (1 + bool(
                         (karta[a.pos][0]).upper() in (
-                        terrain.walkables[0]).upper()))
+                            terrain.walkables[0]).upper()))
                 else:
+                    nodesToTraverse = pathfinding.convertLandToNodes()  # something with pos, g, h
                     a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeSpanRemaining)
 
                 if a.agentType == AgentEnum.SCOUT:

@@ -3,7 +3,7 @@ from time import time
 
 class Node:
     def __init__(self, h=None, neighbours=None):
-        self.g = 0
+        self.g = None
         self.h = h
         self.neighbours = neighbours
         self.parent = None
