@@ -26,20 +26,21 @@ class Land:
 
 
 class Agent:
-    def __init__(self, pos, agentEnum=AgentEnum.WORKER):
+    def __init__(self, pos):
         self.pos = pos
         self.pathToGoal = []
 
-        self.agentType = agentEnum
+        self.agentType = AgentEnum.WORKER
         self.timer = 0
         self.holding = ItemEnum.none
 
 
 lands = {}
-discovered = {}
+discovered = {}  # (x, y): trees
 karta = terrain.InitMap()
 startingPoint = terrain.placeAgents()
-agents = [Agent(startingPoint[:], enums.AgentEnum.WORKER), Agent(startingPoint[:], enums.AgentEnum.SCOUT)]
+agents = [Agent(startingPoint[:]), Agent(startingPoint[:])]
+agents[1].agentType = AgentEnum.SCOUT
 
 terr = 'V', 'B', 'G', 'M', 'T'
 buildings = 'C',  # placed on 'M'
@@ -51,10 +52,6 @@ for L in karta:
         lands[L].trees = 5
 
 s = 10
-
-
-# more than two agents are only necessarily when scaling the simulation (divide and conquer)
-
 
 # destination
 def draw_players(p):
@@ -145,6 +142,7 @@ while charCoal < 200:
                     for n in r + ((0, 0),):
                         neigh = a.pos[0] + n[0], a.pos[1] + n[1]
                         karta[neigh][0] = (karta[neigh][0]).upper()
+                        discovered[neigh] = lands[neigh].trees
             a.timer = time() + a.timer
 
     update_map()
