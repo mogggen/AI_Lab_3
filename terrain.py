@@ -79,6 +79,13 @@ def walkableEdges():
                 karta[g] += [pos + (v,)]
 
 
+def findScoutGoal():
+    while True:
+        where = R.randint(0, 9999)
+        scoutGoal = where % 100, where // 100
+        if karta[scoutGoal][0] in ("m", "g"):
+            return scoutGoal
+
 def placeAgents():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1), (0, 0)
     while True:

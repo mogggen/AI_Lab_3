@@ -54,6 +54,7 @@ for L in karta:
 
 s = 10
 
+
 # destination
 def draw_players(p):
     for i in p:
@@ -95,8 +96,6 @@ def draw_connections():
             pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2),
                                (g[0] * s + s / 2, g[1] * s + s / 2), 1)
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
-
-
 
 
 def update_map():
@@ -143,7 +142,7 @@ while charCoal < 200:
             miller += 1
 
         if time() > a.timer:
-            if a.agentType in (AgentEnum.WORKER, AgentEnum.SCOUT):
+            if a.agentType == AgentEnum.WORKER:
                 if a.pathToGoal:
                     a.pos = a.pathToGoal.pop()
                     a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0]) * (1 + bool(
@@ -155,20 +154,19 @@ while charCoal < 200:
                 elif craftsmen < 1:
                     a.timer = time() + 120
                     a.agentType = AgentEnum.BUILDER
-                elif miller < 0:
+                elif miller < 1:
                     a.timer = time() + 120
                     a.agentType = AgentEnum.MILLER
 
 
-                else:
-                    nodesToTraverse = pathfinding.convertLandToNodes(discovered)  # something with pos, g, h
-                    a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeSpanRemaining)
+            if a.agentType == AgentEnum.SCOUT:
 
-                if a.agentType == AgentEnum.SCOUT:
-                    for n in r + ((0, 0),):
-                        neigh = a.pos[0] + n[0], a.pos[1] + n[1]
-                        karta[neigh][0] = (karta[neigh][0]).upper()
-                        discovered[neigh] = lands[neigh].trees
-            a.timer = time() + a.timer
+                nodesToTraverse = pathfinding.convertLandToNodes(discovered, terrain.findScoutGoal())  # something with pos, g, h
+                a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeSpanRemaining)
+
+                for n in r + ((0, 0),):
+                    neigh = a.pos[0] + n[0], a.pos[1] + n[1]
+                    karta[neigh][0] = (karta[neigh][0]).upper()
+                        discovered[neigh] = [lands[neigh].terrain, lands[neigh].trees]
 
     update_map()

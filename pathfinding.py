@@ -9,13 +9,15 @@ class Node:
         self.parent = None
 
 
-def convertLandToNodes(graph):
+def convertLandToNodes(graph, goal):
     if not graph:
         return
+
     node_list = {}
 
     for g in graph:
-        node_list[g] = Node()
+        dist = ((g[0] - goal[0])**2 + (g[1] - goal[1]**2))**.5 * 15
+        node_list[g] = Node(dist)
 
     return node_list
 
