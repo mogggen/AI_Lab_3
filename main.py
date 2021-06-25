@@ -36,7 +36,8 @@ class Agent:
 
 
 lands = {}
-discovered = {}  # (x, y): trees
+discovered = {}
+treeTiles = {}
 karta = terrain.InitMap()
 startingPoint = terrain.placeAgents()
 agents = [Agent(startingPoint[:]), Agent(startingPoint[:])]
@@ -109,7 +110,8 @@ def update_map():
     for g in karta:
         if karta[g][0].isupper():
             discovered[g] = karta[g][0]
-        rect(discovered[g] + (karta[g][0],))
+            treeTiles[g] = lands[g].trees
+            rect([g + (karta[g][0],)])
 
     draw_players(agents)
 
@@ -126,7 +128,20 @@ nodesToTraverse = pathfinding.convertLandToNodes(lands)
 # loop
 while charCoal < 200:
     shortestTimeSpanRemaining = min(agents, key=lambda t: t.timer).timer  # to avoid race conditions
+    workers = 0
+    scouts = 0
+    craftsmen = 0
+    miller = 0
     for a in agents:
+        if a.agentType == AgentEnum.WORKER:
+            workers += 1
+        if a.agentType == AgentEnum.SCOUT:
+            scouts += 1
+        if a.agentType == AgentEnum.BUILDER:
+            craftsmen += 1
+        if a.agentType == AgentEnum.MILLER:
+            miller += 1
+
         if time() > a.timer:
             if a.agentType in (AgentEnum.WORKER, AgentEnum.SCOUT):
                 if a.pathToGoal:
@@ -134,8 +149,19 @@ while charCoal < 200:
                     a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0]) * (1 + bool(
                         (karta[a.pos][0]).upper() in (
                             terrain.walkables[0]).upper()))
+                elif scouts < 3:
+                    a.timer = time() + 60
+                    a.agentType = AgentEnum.SCOUT
+                elif craftsmen < 1:
+                    a.timer = time() + 120
+                    a.agentType = AgentEnum.BUILDER
+                elif miller < 0:
+                    a.timer = time() + 120
+                    a.agentType = AgentEnum.MILLER
+
+
                 else:
-                    nodesToTraverse = pathfinding.convertLandToNodes()  # something with pos, g, h
+                    nodesToTraverse = pathfinding.convertLandToNodes(discovered)  # something with pos, g, h
                     a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeSpanRemaining)
 
                 if a.agentType == AgentEnum.SCOUT:

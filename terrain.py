@@ -49,7 +49,6 @@ def findTrees(land):
     global karta
     for g in karta:
         if karta[g][0] == 't':
-            karta[g][0] = 'm'.upper()
             land.trees = 5
         drawTrees(g, land.trees)
 
