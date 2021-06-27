@@ -120,13 +120,13 @@ def update_map():
 
 
 previousDeltaCalculationTime = 0
-shortestTimeSpanRemaining = 0
-nodesToTraverse = pathfinding.convertLandToNodes(lands)
+shortestTimeRemaining = 0
+# nodesToTraverse = pathfinding.convertLandToNodes(lands)
 
 
-# loop
+# game loop
 while charCoal < 200:
-    shortestTimeSpanRemaining = min(agents, key=lambda t: t.timer).timer  # to avoid race conditions
+    shortestTimeRemaining = min(agents, key=lambda t: t.timer).timer
     workers = 0
     scouts = 0
     craftsmen = 0
@@ -158,15 +158,28 @@ while charCoal < 200:
                     a.timer = time() + 120
                     a.agentType = AgentEnum.MILLER
 
-
             if a.agentType == AgentEnum.SCOUT:
 
-                nodesToTraverse = pathfinding.convertLandToNodes(discovered, terrain.findScoutGoal())  # something with pos, g, h
-                a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeSpanRemaining)
+                nodesToTraverse = pathfinding.convertLandToNodes(graph, terrain.findScoutGoal())  # something with pos, g, h
+                a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeRemaining)
 
                 for n in r + ((0, 0),):
                     neigh = a.pos[0] + n[0], a.pos[1] + n[1]
                     karta[neigh][0] = (karta[neigh][0]).upper()
-                        discovered[neigh] = [lands[neigh].terrain, lands[neigh].trees]
+                    discovered[neigh] = [lands[neigh].terrain, lands[neigh].trees]
+
+            if a.agentType == AgentEnum.BUILDER:
+                if karta[a.pos][0] == 'M' and lands[a.pos].trees >= 10:
+                    lands[a.pos].trees -= 10
+                    karta[a.pos][0] = 'K'
+                    a.timer = time() + 60
+
+            if a.agentType == AgentEnum.MILLER:
+                if karta[a.pos] == 'K' and lands[a.pos].trees >= 2:
+                    lands[a.pos].trees -= 2
+                    a.timer = time() + 30
+                    charCoal += 1
+
+            print(charCoal / 200, "%")
 
     update_map()

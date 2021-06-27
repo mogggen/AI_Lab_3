@@ -5,7 +5,9 @@ terrainColor = {
     'M': (212, 175, 42),
 
     'V': (14, 113, 194),
-    'B': (125, 125, 122)
+    'B': (125, 125, 122),
+
+    'K': (0xb2, 0x22, 0x22)
 }
 
 agentColor = (
@@ -15,4 +17,4 @@ agentColor = (
     (214, 92, 11)  # millers
 )
 
-buildColor = 0xb2, 0x22, 0x22  # coalMill
+buildColor = (0xb2, 0x22, 0x22),  # coalMill

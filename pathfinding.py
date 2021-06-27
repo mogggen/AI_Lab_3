@@ -10,14 +10,21 @@ class Node:
 
 
 def convertLandToNodes(graph, goal):
+    r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
+
     if not graph:
-        return
+        raise NotImplementedError
 
     node_list = {}
 
     for g in graph:
+        if graph[g][0] not in ('M', 'T', 'G'):
+            continue
         dist = ((g[0] - goal[0])**2 + (g[1] - goal[1]**2))**.5 * 15
         node_list[g] = Node(dist)
+        for n in r:
+            if
+            node_list[g].neighbours +=
 
     return node_list
 
