@@ -1,5 +1,7 @@
 from time import time
 
+import terrain
+
 
 class Node:
     def __init__(self, h=None, neighbours=None):
@@ -9,32 +11,12 @@ class Node:
         self.parent = None
 
 
-def convertLandToNodes(graph, goal):
-    r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
-
-    if not graph:
-        raise NotImplementedError
-
-    node_list = {}
-
-    for g in graph:
-        if graph[g][0] not in ('M', 'T', 'G'):
-            continue
-        dist = ((g[0] - goal[0])**2 + (g[1] - goal[1]**2))**.5 * 15
-        node_list[g] = Node(dist)
-        for n in r:
-            if
-            node_list[g].neighbours +=
-
-    return node_list
-
-
 def moveCost(parent, child):
     return 14 if ((parent[0] - child[0]) + (parent[1] - child[1])) % 2 == 0 else 10
 
 
 # shan't be called by workers if none of them are holding tree or none of them can see a tree
-def aStar(graph, start, endTime):
+def aStar(graph, start, end, endTime):
     closed_list = []
     open_list = []
     node = start
@@ -45,8 +27,8 @@ def aStar(graph, start, endTime):
     while open_list:
         delta = time() - delta
 
-        # return final path
-        if graph[node].h == 0 or delta < endTime:
+        # return final path or if the time to compute the next edge is too long
+        if graph[node].h == 0 or delta >= endTime:
             path = [node]
             while graph[node].parent:
                 path.append(graph[node].parent)

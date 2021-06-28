@@ -41,7 +41,7 @@ treeTiles = {}
 karta = terrain.InitMap()
 startingPoint = terrain.placeAgents()
 agents = [Agent(startingPoint[:]), Agent(startingPoint[:])]
-agents[1].agentType = AgentEnum.SCOUT
+# agents[1].agentType = AgentEnum.SCOUT
 
 terr = 'V', 'B', 'G', 'M', 'T'
 buildings = 'C',  # placed on 'M'
@@ -122,11 +122,24 @@ def update_map():
 previousDeltaCalculationTime = 0
 shortestTimeRemaining = 0
 # nodesToTraverse = pathfinding.convertLandToNodes(lands)
+def graphToNodes(graph=karta):
+    if not graph:
+        return
+    nodelist = {}
+    for g in graph:
+        if graph[g][0] in ('T', 'G', 'M'):
+            nodelist[g] = pathfinding.Node(graph[g][1:])
+
+
+
 
 
 # game loop
 while charCoal < 200:
-    shortestTimeRemaining = min(agents, key=lambda t: t.timer).timer
+    for a in agents:
+        if (a.agentType in (AgentEnum.SCOUT, AgentEnum.WORKER)) and a.timer < shortestTimeRemaining:
+            shortestTimeRemaining = a.timer
+    # shortestTimeRemaining = min(agents, key=lambda t: t.timer).timer
     workers = 0
     scouts = 0
     craftsmen = 0
@@ -160,8 +173,9 @@ while charCoal < 200:
 
             if a.agentType == AgentEnum.SCOUT:
 
-                nodesToTraverse = pathfinding.convertLandToNodes(graph, terrain.findScoutGoal())  # something with pos, g, h
-                a.pathToGoal = pathfinding.aStar(nodesToTraverse, a.pos, shortestTimeRemaining)
+                # something with pos, g, h
+
+                a.pathToGoal = pathfinding.aStar(karta, a.pos, a.pathToGoal.pop(0), shortestTimeRemaining)
 
                 for n in r + ((0, 0),):
                     neigh = a.pos[0] + n[0], a.pos[1] + n[1]
