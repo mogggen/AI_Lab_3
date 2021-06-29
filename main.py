@@ -98,12 +98,33 @@ def draw_connections():
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
+
+
+def draw_trees(pos: tuple, amount):
+    if not amount:
+        return
+    loc = [29, 43, 75, 54, 31]
+    for T in loc[:amount]:
+        square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 2, 2)
+        pygame.draw.rect(screen, color.terrainColor['T'], square, 1)
+        screen.fill(color.terrainColor['T'], square)
+
+
+def findTrees(land):
+    global karta
+    for g in karta:
+        if karta[g][0] == 't':
+            land.trees = 5
+        draw_trees(g, land.trees)
+
+
+
 def update_map():
     global discovered
     global agents
 
     for L in lands:
-        terrain.drawTrees(L, lands[L].trees)
+        draw_trees(L, lands[L].trees)
 
     # find trees
     for g in karta:
@@ -157,10 +178,11 @@ while charCoal < 200:
         if time() > a.timer:
             if a.agentType == AgentEnum.WORKER:
                 if a.pathToGoal:
-                    a.pos = a.pathToGoal.pop()
                     a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0]) * (1 + bool(
                         (karta[a.pos][0]).upper() in (
                             terrain.walkables[0]).upper()))
+                    a.pos = a.pathToGoal.pop(0)
+
                 elif scouts < 3:
                     a.timer = time() + 60
                     a.agentType = AgentEnum.SCOUT
@@ -174,8 +196,11 @@ while charCoal < 200:
             if a.agentType == AgentEnum.SCOUT:
 
                 # something with pos, g, h
-
-                a.pathToGoal = pathfinding.aStar(karta, a.pos, a.pathToGoal.pop(0), shortestTimeRemaining)
+                if a.pathToGoal:
+                    a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0])
+                    a.pos = a.pathToGoal.pop(0)
+                else:
+                    a.pathToGoal = pathfinding.aStar(karta, a.pos, terrain.findScoutGoal(), shortestTimeRemaining)
 
                 for n in r + ((0, 0),):
                     neigh = a.pos[0] + n[0], a.pos[1] + n[1]

@@ -1,7 +1,5 @@
 from time import time
 
-import terrain
-
 
 class Node:
     def __init__(self, h=None, neighbours=None):
@@ -28,7 +26,7 @@ def aStar(graph, start, end, endTime):
         delta = time() - delta
 
         # return final path or if the time to compute the next edge is too long
-        if graph[node].h == 0 or delta >= endTime:
+        if graph[node].h == 0 or delta >= endTime:  # FIXME fit the node format so that the A* can operate on said graph
             path = [node]
             while graph[node].parent:
                 path.append(graph[node].parent)

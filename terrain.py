@@ -1,10 +1,8 @@
 import math
 import time
 import random as R
-import pygame
 
 import color
-import main
 
 terrain = open("Map.txt", 'r')
 karta = {}
@@ -49,22 +47,9 @@ def InitMap():
     return karta
 
 
-def findTrees(land):
-    global karta
-    for g in karta:
-        if karta[g][0] == 't':
-            land.trees = 5
-        drawTrees(g, land.trees)
 
 
-def drawTrees(pos: tuple, amount):
-    if not amount:
-        return
-    loc = [29, 43, 75, 54, 31]
-    for T in loc[:amount]:  # FIXME main.screen causes circular import
-        square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 2, 2)
-        pygame.draw.rect(main.screen, color.terrainColor['T'], square, 1)
-        main.screen.fill(color.terrainColor['T'], square)
+
 
 def walkableEdges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
