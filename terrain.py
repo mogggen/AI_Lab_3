@@ -1,8 +1,4 @@
-import math
-import time
-import random as R
-
-import color
+import random
 
 terrain = open("Map.txt", 'r')
 karta = {}
@@ -35,7 +31,7 @@ non_walkables = 'v', 'b'
 walkables = 'm', 't', 'g'
 
 
-def InitMap():
+def init_map():
     h = terrain.read()
     chars = h[:]
     chars = str(chars).replace("\n", "").lower()
@@ -43,15 +39,11 @@ def InitMap():
     for y in enumerate(h):
         for x in enumerate(y[1]):
             karta[x[0], y[0]] = [chars[x[0] + y[0] * len(y[1])]]
-    walkableEdges()
+    walkable_edges()
     return karta
 
 
-
-
-
-
-def walkableEdges():
+def walkable_edges():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
     global karta
     for g in karta:
@@ -69,18 +61,18 @@ def walkableEdges():
                 karta[g] += [pos + (v,)]
 
 
-def findScoutGoal():
+def find_scout_goal():
     while True:
-        where = R.randint(0, 9999)
-        scoutGoal = where % 100, where // 100
-        if karta[scoutGoal][0] in ("m", "g"):
-            return scoutGoal
+        where = random.randint(0, 9999)
+        scout_goal = where % 100, where // 100
+        if karta[scout_goal][0] in ("m", "g"):
+            return scout_goal
 
 
-def placeAgents():
+def place_agents():
     r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1), (0, 0)
     while True:
-        where = R.randint(0, 9999)
+        where = random.randint(0, 9999)
         x, y = where % 100, where // 100
         if karta[x, y][0] in ("m", "g"):
             for dx, dy in r:

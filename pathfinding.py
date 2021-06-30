@@ -9,12 +9,12 @@ class Node:
         self.parent = None
 
 
-def moveCost(parent, child):
+def move_cost(parent, child):
     return 14 if ((parent[0] - child[0]) + (parent[1] - child[1])) % 2 == 0 else 10
 
 
 # shan't be called by workers if none of them are holding tree or none of them can see a tree
-def aStar(graph, start, end, endTime):
+def a_star(graph, start, end, end_time):
     closed_list = []
     open_list = []
     node = start
@@ -26,7 +26,7 @@ def aStar(graph, start, end, endTime):
         delta = time() - delta
 
         # return final path or if the time to compute the next edge is too long
-        if graph[node].h == 0 or delta >= endTime:  # FIXME fit the node format so that the A* can operate on said graph
+        if graph[node].h == 0 or delta >= end_time:  # FIXME fit the node format so that the A* can operate on said graph
             path = [node]
             while graph[node].parent:
                 path.append(graph[node].parent)
@@ -44,10 +44,10 @@ def aStar(graph, start, end, endTime):
                 continue
 
             if n not in open_list:
-                graph[n].g = graph[node].g + moveCost(node, n)
+                graph[n].g = graph[node].g + move_cost(node, n)
                 graph[n].parent = node
                 open_list.append(n)
 
-            elif graph[node].g + moveCost(node, n) < graph[n].g:
-                graph[n].g = graph[node].g + moveCost(node, n)
+            elif graph[node].g + move_cost(node, n) < graph[n].g:
+                graph[n].g = graph[node].g + move_cost(node, n)
                 graph[n].parent = node

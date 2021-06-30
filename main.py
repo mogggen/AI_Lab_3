@@ -38,8 +38,8 @@ class Agent:
 lands = {}
 discovered = {}
 treeTiles = {}
-karta = terrain.InitMap()
-startingPoint = terrain.placeAgents()
+karta = terrain.init_map()
+startingPoint = terrain.place_agents()
 agents = [Agent(startingPoint[:]), Agent(startingPoint[:])]
 # agents[1].agentType = AgentEnum.SCOUT
 
@@ -92,12 +92,10 @@ def draw_connections():
     xy = 0, 0
     while xy[0] < 100 and xy[1] < 100:
         for g in karta[xy][1:]:
-            newC = color.terrainColor[(karta[g[:2]][0]).upper()]
-            pygame.draw.aaline(screen, newC, (xy[0] * s + s / 2, xy[1] * s + s / 2),
+            new_c = color.terrainColor[(karta[g[:2]][0]).upper()]
+            pygame.draw.aaline(screen, new_c, (xy[0] * s + s / 2, xy[1] * s + s / 2),
                                (g[0] * s + s / 2, g[1] * s + s / 2), 1)
         xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
-
-
 
 
 def draw_trees(pos: tuple, amount):
@@ -110,7 +108,7 @@ def draw_trees(pos: tuple, amount):
         screen.fill(color.terrainColor['T'], square)
 
 
-def findTrees(land):
+def find_trees(land):
     global karta
     for g in karta:
         if karta[g][0] == 't':
@@ -118,13 +116,12 @@ def findTrees(land):
         draw_trees(g, land.trees)
 
 
-
 def update_map():
     global discovered
     global agents
 
-    for L in lands:
-        draw_trees(L, lands[L].trees)
+    for i in lands:
+        draw_trees(i, lands[i].trees)
 
     # find trees
     for g in karta:
@@ -143,16 +140,15 @@ def update_map():
 previousDeltaCalculationTime = 0
 shortestTimeRemaining = 0
 # nodesToTraverse = pathfinding.convertLandToNodes(lands)
-def graphToNodes(graph=karta):
+
+
+def graph_to_nodes(graph=karta):
     if not graph:
         return
     nodelist = {}
     for g in graph:
         if graph[g][0] in ('T', 'G', 'M'):
             nodelist[g] = pathfinding.Node(graph[g][1:])
-
-
-
 
 
 # game loop
@@ -178,7 +174,7 @@ while charCoal < 200:
         if time() > a.timer:
             if a.agentType == AgentEnum.WORKER:
                 if a.pathToGoal:
-                    a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0]) * (1 + bool(
+                    a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * (1 + bool(
                         (karta[a.pos][0]).upper() in (
                             terrain.walkables[0]).upper()))
                     a.pos = a.pathToGoal.pop(0)
@@ -197,10 +193,10 @@ while charCoal < 200:
 
                 # something with pos, g, h
                 if a.pathToGoal:
-                    a.timer = pathfinding.moveCost(a.pos, a.pathToGoal[0])
+                    a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0])
                     a.pos = a.pathToGoal.pop(0)
                 else:
-                    a.pathToGoal = pathfinding.aStar(karta, a.pos, terrain.findScoutGoal(), shortestTimeRemaining)
+                    a.pathToGoal = pathfinding.a_star(karta, a.pos, terrain.find_scout_goal(), shortestTimeRemaining)
 
                 for n in r + ((0, 0),):
                     neigh = a.pos[0] + n[0], a.pos[1] + n[1]
