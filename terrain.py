@@ -65,17 +65,18 @@ def find_scout_goal():
 	while True:
 		where = random.randint(0, 9999)
 		scout_goal = where % 100, where // 100
-		if karta[scout_goal][0] in ("m", "g"):
+		if karta[scout_goal][0] in walkables:
 			return scout_goal
 
 
-def place_agents():
+def place_agents(discovered):
 	r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1), (0, 0)
 	while True:
 		where = random.randint(0, 9999)
 		x, y = where % 100, where // 100
-		if karta[x, y][0] in ("m", "g"):
+		if karta[x, y][0] == 'm':
 			for dx, dy in r:
 				u = x + dx, y + dy
 				karta[u] = [karta[u][0].upper()]
+				discovered[u] = karta[u][0].upper()
 			return x, y

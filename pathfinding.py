@@ -3,10 +3,11 @@ from time import time
 
 class Node:
 	def __init__(self, h=None, neighbours=None):
-		self.g = None
-		self.h = h
-		self.neighbours = neighbours
-		self.parent = None
+		self.g = None  # int
+		self.h = h  # int
+		self.neighbours = neighbours  # list(point((int, int)))
+		self.parent = None  # (point(int, int))
+# points used as graph[key]
 
 
 def move_cost(parent, child):

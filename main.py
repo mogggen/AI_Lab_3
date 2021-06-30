@@ -39,7 +39,7 @@ lands = {}
 discovered = {}
 treeTiles = {}
 karta = terrain.init_map()
-startingPoint = terrain.place_agents()
+startingPoint = terrain.place_agents(discovered)
 agents = [Agent(startingPoint[:]), Agent(startingPoint[:])]
 # agents[1].agentType = AgentEnum.SCOUT
 
@@ -111,7 +111,7 @@ def draw_trees(pos: tuple, amount):
 def find_trees(land):
 	global karta
 	for g in karta:
-		if karta[g][0] == 't':
+		if karta[g][0] == 'T':  # FIXME should be uppercase so only the discovered treeTiles draw trees
 			land.trees = 5
 		draw_trees(g, land.trees)
 
