@@ -53,11 +53,11 @@ def walkable_edges():
 				continue
 			
 			if karta[pos][0] in walkables:
-				v = 1
+				v = 10
 				if not (n[0] + n[1]) % 2:
-					v = round((2 * v ** 2) ** .5, 1)
+					v = int((2 * v ** 2) ** .5)
 					if karta[pos][0] not in walkables[0]:
-						v = round(2 * v, 1)
+						v = int(2 * v)
 				karta[g] += [pos + (v,)]
 
 

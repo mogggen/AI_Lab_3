@@ -15,7 +15,7 @@ def move_cost(parent, child):
 
 
 # shan't be called by workers if none of them are holding tree or none of them can see a tree
-def a_star(graph, start, end, end_time):
+def a_star(graph, start, end_time):
 	closed_list = []
 	open_list = []
 	node = start

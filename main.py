@@ -40,8 +40,9 @@ discovered = {}
 treeTiles = {}
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
-agents = [Agent(startingPoint[:]), Agent(startingPoint[:])]
-# agents[1].agentType = AgentEnum.SCOUT
+agents = []
+for a in range(50):
+	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
 buildings = 'C',  # placed on 'M'
@@ -142,13 +143,15 @@ shortestTimeRemaining = 0
 # nodesToTraverse = pathfinding.convertLandToNodes(lands)
 
 
-def graph_to_nodes(graph=karta):
-	if not graph:
-		return
+def graph_to_nodes(goal, graph=karta):
 	nodelist = {}
 	for g in graph:
 		if graph[g][0] in ('T', 'G', 'M'):
-			nodelist[g] = pathfinding.Node(graph[g][1:])
+			tmp = []
+			for o in graph[g][1:]:
+				tmp.append(o[:2])
+			nodelist[g] = pathfinding.Node(int((g[0] - goal[0])**2 + (g[1] - goal[1]**2))**.5, tmp)
+	return nodelist
 
 
 # game loop
@@ -196,7 +199,12 @@ while charCoal < 200:
 					a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0])
 					a.pos = a.pathToGoal.pop(0)
 				else:
-					a.pathToGoal = pathfinding.a_star(karta, a.pos, terrain.find_scout_goal(), shortestTimeRemaining)
+					# TODO perform conversion here
+					rng_undiscovered = terrain.find_scout_goal()
+					# print(karta[rng_undiscovered])
+					to_traverse = graph_to_nodes(rng_undiscovered)
+					
+					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, shortestTimeRemaining)
 				
 				for n in r + ((0, 0),):
 					neigh = a.pos[0] + n[0], a.pos[1] + n[1]
@@ -214,7 +222,7 @@ while charCoal < 200:
 					lands[a.pos].trees -= 2
 					a.timer = time() + 30
 					charCoal += 1
-			
-			print(charCoal / 200, "%")
+			print(shortestTimeRemaining)
+			# print("charCoal:", charCoal / 200, "%")
 	
 	update_map()
