@@ -72,7 +72,7 @@ def draw_players(p):
 		else:
 			print(i)
 			raise NotImplementedError
-		square = pygame.Rect(x + s // 2, y + s // 2, 2, 2)
+		square = pygame.Rect(x, y, 2, 2)
 		pygame.draw.rect(screen, c, square, 1)
 		screen.fill(c, square)
 
@@ -163,7 +163,7 @@ while charCoal < 200:
 	workers = 0
 	scouts = 0
 	craftsmen = 0
-	miller = 0
+	millers = 0
 	for a in agents:
 		if a.agentType == AgentEnum.WORKER:
 			workers += 1
@@ -172,7 +172,7 @@ while charCoal < 200:
 		if a.agentType == AgentEnum.BUILDER:
 			craftsmen += 1
 		if a.agentType == AgentEnum.MILLER:
-			miller += 1
+			millers += 1
 		
 		if time() > a.timer:
 			if a.agentType == AgentEnum.WORKER:
@@ -188,7 +188,7 @@ while charCoal < 200:
 				elif craftsmen < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.BUILDER
-				elif miller < 1:
+				elif millers < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.MILLER
 			
@@ -222,7 +222,8 @@ while charCoal < 200:
 					lands[a.pos].trees -= 2
 					a.timer = time() + 30
 					charCoal += 1
-			print(shortestTimeRemaining)
+			print(workers, scouts, craftsmen, millers)
+			# print(shortestTimeRemaining)
 			# print("charCoal:", charCoal / 200, "%")
 	
 	update_map()
