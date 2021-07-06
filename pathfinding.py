@@ -15,11 +15,11 @@ def move_cost(parent, child):
 
 
 # shan't be called by workers if none of them are holding tree or none of them can see a tree
-def a_star(graph, start, end_time):
+def a_star(graph, start, end_time=100):
 	closed_list = []
 	open_list = []
 	node = start
-	
+	graph[node].g = 0
 	open_list.append(node)
 	
 	delta = time()
@@ -27,7 +27,7 @@ def a_star(graph, start, end_time):
 		delta = time() - delta
 		
 		# return final path or if the time to compute the next edge is too long
-		if graph[node].h == 0 or delta >= end_time:  # FIXME fit the node format so that the A* can operate on said graph
+		if graph[node].h == 0:  # or delta >= end_time:  # FIXME fit the node format so that the A* can operate on said graph
 			path = [node]
 			while graph[node].parent:
 				path.append(graph[node].parent)

@@ -1,3 +1,5 @@
+import random
+
 import enums
 import pathfinding
 from enums import AgentEnum, ItemEnum
@@ -99,18 +101,21 @@ def draw_connections():
 		xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
-def draw_trees(pos: tuple, amount):
-	if not amount:
+def draw_trees(pos: tuple[int, int], amount: int):
+	if amount <= 0:
 		return
+	rect([pos + (karta[pos][0],)])
+	
 	loc = [29, 43, 75, 54, 31]
 	for T in loc[:amount]:
 		square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 2, 2)
-		pygame.draw.rect(screen, color.terrainColor['T'], square, 1)
-		screen.fill(color.terrainColor['T'], square)
+		pygame.draw.rect(screen, color.terrainColor['G'], square, 1)
+		screen.fill(color.terrainColor['G'], square)
 
 
 def find_trees(land):
 	global karta
+	
 	for g in karta:
 		if karta[g][0] == 'T':  # FIXME should be uppercase so only the discovered treeTiles draw trees
 			land.trees = 5
@@ -121,8 +126,8 @@ def update_map():
 	global discovered
 	global agents
 	
-	for i in lands:
-		draw_trees(i, lands[i].trees)
+	# for i in lands:
+	#	draw_trees(i, lands[i].trees)
 	
 	# find trees
 	for g in karta:
@@ -130,6 +135,7 @@ def update_map():
 			discovered[g] = karta[g][0]
 			treeTiles[g] = lands[g].trees
 			rect([g + (karta[g][0],)])
+			draw_trees(treeTiles[g], lands[g].trees)
 	
 	draw_players(agents)
 	
@@ -139,18 +145,20 @@ def update_map():
 
 
 previousDeltaCalculationTime = 0
-shortestTimeRemaining = 0
+shortestTimeRemaining = time()
+
+
 # nodesToTraverse = pathfinding.convertLandToNodes(lands)
 
 
-def graph_to_nodes(goal, graph=karta):
+def graph_to_nodes(goal, information=AgentEnum.WORKER, graph=karta):
 	nodelist = {}
 	for g in graph:
-		if graph[g][0] in ('T', 'G', 'M'):
+		if information == AgentEnum.SCOUT and graph[g][0].upper() in ('T', 'G', 'M') or graph[g][0] in ('T', 'G', 'M'):
 			tmp = []
 			for o in graph[g][1:]:
 				tmp.append(o[:2])
-			nodelist[g] = pathfinding.Node(int((g[0] - goal[0])**2 + (g[1] - goal[1]**2))**.5, tmp)
+			nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), tmp)
 	return nodelist
 
 
@@ -176,22 +184,27 @@ while charCoal < 200:
 		
 		if time() > a.timer:
 			if a.agentType == AgentEnum.WORKER:
-				if a.pathToGoal:
-					a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * (1 + bool(
-						(karta[a.pos][0]).upper() in (
-							terrain.walkables[0]).upper()))
-					a.pos = a.pathToGoal.pop(0)
-				
-				elif scouts < 3:
-					a.timer = time() + 60
+				if scouts < 3:
+					a.timer = time() + 1
 					a.agentType = AgentEnum.SCOUT
+					a.pathToGoal = []
+					scouts += 1
 				elif craftsmen < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.BUILDER
+					a.pathToGoal = []
+					craftsmen += 1
 				elif millers < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.MILLER
-			
+					a.pathToGoal = []
+					millers += 1
+				
+				if a.pathToGoal:
+					a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * \
+							(1 + bool((karta[a.pos][0]).upper() == (terrain.walkables[0]).upper()))
+					a.pos = a.pathToGoal.pop(0)
+					print(a.pos)
 			if a.agentType == AgentEnum.SCOUT:
 				
 				# something with pos, g, h
@@ -201,10 +214,11 @@ while charCoal < 200:
 				else:
 					# TODO perform conversion here
 					rng_undiscovered = terrain.find_scout_goal()
-					# print(karta[rng_undiscovered])
-					to_traverse = graph_to_nodes(rng_undiscovered)
+					
+					to_traverse = graph_to_nodes(rng_undiscovered, a.agentType)
 					
 					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, shortestTimeRemaining)
+					print(a.pathToGoal)
 				
 				for n in r + ((0, 0),):
 					neigh = a.pos[0] + n[0], a.pos[1] + n[1]
@@ -220,10 +234,11 @@ while charCoal < 200:
 			if a.agentType == AgentEnum.MILLER:
 				if karta[a.pos] == 'K' and lands[a.pos].trees >= 2:
 					lands[a.pos].trees -= 2
-					a.timer = time() + 30
 					charCoal += 1
-			print(workers, scouts, craftsmen, millers)
-			# print(shortestTimeRemaining)
-			# print("charCoal:", charCoal / 200, "%")
+					a.timer = time() + 30
+	
+	# if int(agents[0].timer - time()) % 10 == 0:
+	# print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
+	# print("charCoal:", charCoal / 200, "%")
 	
 	update_map()
