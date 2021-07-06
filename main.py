@@ -39,11 +39,11 @@ class Agent:
 
 lands = {}
 discovered = {}
-treeTiles = {}
+treeTiles = []
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
-for a in range(50):
+for a in range(1):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
@@ -72,7 +72,6 @@ def draw_players(p):
 		elif i.agentType == enums.AgentEnum.MILLER:
 			c = color.agentColor[3]
 		else:
-			print(i)
 			raise NotImplementedError
 		square = pygame.Rect(x, y, 2, 2)
 		pygame.draw.rect(screen, c, square, 1)
@@ -97,7 +96,7 @@ def draw_connections():
 		for g in karta[xy][1:]:
 			new_c = color.terrainColor[(karta[g[:2]][0]).upper()]
 			pygame.draw.aaline(screen, new_c, (xy[0] * s + s / 2, xy[1] * s + s / 2),
-							   (g[0] * s + s / 2, g[1] * s + s / 2), 1)
+			                   (g[0] * s + s / 2, g[1] * s + s / 2), 1)
 		xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
 
 
@@ -133,9 +132,10 @@ def update_map():
 	for g in karta:
 		if karta[g][0].isupper():
 			discovered[g] = karta[g][0]
-			treeTiles[g] = lands[g].trees
+			if lands[g].trees:
+				treeTiles.append(g)  # = lands[g].trees
 			rect([g + (karta[g][0],)])
-			draw_trees(treeTiles[g], lands[g].trees)
+			draw_trees(g, lands[g].trees)
 	
 	draw_players(agents)
 	
@@ -151,7 +151,7 @@ shortestTimeRemaining = time()
 # nodesToTraverse = pathfinding.convertLandToNodes(lands)
 
 
-def graph_to_nodes(goal, information=AgentEnum.WORKER, graph=karta):
+def graph_to_nodes(goal, information, graph=karta):
 	nodelist = {}
 	for g in graph:
 		if information == AgentEnum.SCOUT and graph[g][0].upper() in ('T', 'G', 'M') or graph[g][0] in ('T', 'G', 'M'):
@@ -185,26 +185,45 @@ while charCoal < 200:
 		if time() > a.timer:
 			if a.agentType == AgentEnum.WORKER:
 				if scouts < 3:
-					a.timer = time() + 1
+					a.timer = time() + 60
 					a.agentType = AgentEnum.SCOUT
-					a.pathToGoal = []
 					scouts += 1
 				elif craftsmen < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.BUILDER
-					a.pathToGoal = []
 					craftsmen += 1
 				elif millers < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.MILLER
-					a.pathToGoal = []
 					millers += 1
 				
 				if a.pathToGoal:
 					a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * \
-							(1 + bool((karta[a.pos][0]).upper() == (terrain.walkables[0]).upper()))
+					          (1 + bool((karta[a.pos][0]).upper() == (terrain.walkables[0]).upper()))
 					a.pos = a.pathToGoal.pop(0)
-					print(a.pos)
+				
+				# find a new path
+				else:
+					# check if the workers have already reached the goal
+					if karta[a.pos][0].upper() == 'T' and a.holding != ItemEnum.none:
+						lands[a.pos].trees -= 1
+						draw_trees(a.pos, lands[a.pos].trees)
+						a.holding = ItemEnum.tree
+						a.timer = time() + 30
+						
+						to_traverse = graph_to_nodes(startingPoint[:], AgentEnum.WORKER, discovered)
+						saved_time = time() + 100
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+					else:
+						for train in treeTiles:
+							if lands[train].trees > 0:  # all we had todo was to followed the damn train CJ
+								to_traverse = graph_to_nodes(train, AgentEnum.WORKER, discovered)
+								saved_time = time() + 100
+								a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+							else:
+								# dispose of empty tree tiles from the list
+								treeTiles.pop(0)
+								break
 			if a.agentType == AgentEnum.SCOUT:
 				
 				# something with pos, g, h
@@ -216,9 +235,10 @@ while charCoal < 200:
 					rng_undiscovered = terrain.find_scout_goal()
 					
 					to_traverse = graph_to_nodes(rng_undiscovered, a.agentType)
-					
-					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, shortestTimeRemaining)
-					print(a.pathToGoal)
+					saved_time = time() + 100
+					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+					print(rng_undiscovered)
+					print(int(a.timer), a.pathToGoal)
 				
 				for n in r + ((0, 0),):
 					neigh = a.pos[0] + n[0], a.pos[1] + n[1]
