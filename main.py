@@ -1,5 +1,3 @@
-import random
-
 import enums
 import pathfinding
 from enums import AgentEnum, ItemEnum
@@ -43,11 +41,11 @@ treeTiles = []
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
-for a in range(1):
+for a in range(6):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
-buildings = 'C',  # placed on 'M'
+buildings = 'K',  # placed on 'M'
 
 for L in karta:
 	lands[L] = Land(karta[L][0])
@@ -73,7 +71,7 @@ def draw_players(p):
 			c = color.agentColor[3]
 		else:
 			raise NotImplementedError
-		square = pygame.Rect(x, y, 2, 2)
+		square = pygame.Rect(x, y, 7, 7)
 		pygame.draw.rect(screen, c, square, 1)
 		screen.fill(c, square)
 
@@ -132,7 +130,7 @@ def update_map():
 	for g in karta:
 		if karta[g][0].isupper():
 			discovered[g] = karta[g][0]
-			if lands[g].trees:
+			if lands[g].trees > 0:
 				treeTiles.append(g)  # = lands[g].trees
 			rect([g + (karta[g][0],)])
 			draw_trees(g, lands[g].trees)
@@ -148,17 +146,17 @@ previousDeltaCalculationTime = 0
 shortestTimeRemaining = time()
 
 
-# nodesToTraverse = pathfinding.convertLandToNodes(lands)
-
-
 def graph_to_nodes(goal, information, graph=karta):
 	nodelist = {}
-	for g in graph:
-		if information == AgentEnum.SCOUT and graph[g][0].upper() in ('T', 'G', 'M') or graph[g][0] in ('T', 'G', 'M'):
-			tmp = []
-			for o in graph[g][1:]:
-				tmp.append(o[:2])
-			nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), tmp)
+	if information == AgentEnum.SCOUT:
+		for g in graph:
+			if graph[g][0] in ('T', 'G', 'M', 't', 'g', 'm'):
+				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), graph[g][1:])
+	elif information == AgentEnum.WORKER:
+		for g in graph:
+			if graph[g][0] in ('T', 'G', 'M'):
+				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), graph[g][1:])
+				print(graph[g][1:])
 	return nodelist
 
 
@@ -182,20 +180,23 @@ while charCoal < 200:
 		if a.agentType == AgentEnum.MILLER:
 			millers += 1
 		
-		if time() > a.timer:
+		if True or time() > a.timer:
 			if a.agentType == AgentEnum.WORKER:
 				if scouts < 3:
 					a.timer = time() + 60
 					a.agentType = AgentEnum.SCOUT
 					scouts += 1
+					continue
 				elif craftsmen < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.BUILDER
 					craftsmen += 1
+					continue
 				elif millers < 1:
 					a.timer = time() + 120
 					a.agentType = AgentEnum.MILLER
 					millers += 1
+					continue
 				
 				if a.pathToGoal:
 					a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * \
@@ -228,7 +229,7 @@ while charCoal < 200:
 				
 				# something with pos, g, h
 				if a.pathToGoal:
-					a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0])
+					a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[0])
 					a.pos = a.pathToGoal.pop(0)
 				else:
 					# TODO perform conversion here
@@ -237,8 +238,8 @@ while charCoal < 200:
 					to_traverse = graph_to_nodes(rng_undiscovered, a.agentType)
 					saved_time = time() + 100
 					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
-					print(rng_undiscovered)
-					print(int(a.timer), a.pathToGoal)
+					# print(rng_undiscovered)
+					# print("line 241:", int(a.timer), a.pathToGoal)
 				
 				for n in r + ((0, 0),):
 					neigh = a.pos[0] + n[0], a.pos[1] + n[1]
@@ -256,9 +257,8 @@ while charCoal < 200:
 					lands[a.pos].trees -= 2
 					charCoal += 1
 					a.timer = time() + 30
-	
-	# if int(agents[0].timer - time()) % 10 == 0:
-	# print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
-	# print("charCoal:", charCoal / 200, "%")
+	if int(agents[0].timer - time()) % 10 == 0:
+		print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
+		print("charCoal:", charCoal / 200, "%")
 	
 	update_map()

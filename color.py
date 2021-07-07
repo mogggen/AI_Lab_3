@@ -17,4 +17,4 @@ agentColor = (
 	(214, 92, 11)  # millers
 )
 
-buildColor = (0xb2, 0x22, 0x22),  # coalMill
+# buildColor = (0xb2, 0x22, 0x22),  # coalMill

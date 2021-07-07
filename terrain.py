@@ -53,12 +53,7 @@ def walkable_edges():
 				continue
 			
 			if karta[pos][0] in walkables:
-				v = 10
-				if not (n[0] + n[1]) % 2:
-					v = int((2 * v ** 2) ** .5)
-					if karta[pos][0] not in walkables[0]:
-						v = int(2 * v)
-				karta[g] += [pos + (v,)]
+				karta[g] += [pos]
 
 
 def find_scout_goal():
@@ -77,6 +72,6 @@ def place_agents(discovered):
 		if karta[x, y][0] == 'm':
 			for dx, dy in r:
 				u = x + dx, y + dy
-				karta[u] = [karta[u][0].upper()]
+				karta[u][0] = karta[u][0].upper()
 				discovered[u] = karta[u][0].upper()
 			return x, y
