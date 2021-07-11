@@ -86,16 +86,6 @@ def rect(p):
 		screen.fill(color.terrainColor[c], square)
 
 
-def draw_connections():
-	xy = 0, 0
-	while xy[0] < 100 and xy[1] < 100:
-		for g in karta[xy][1:]:
-			new_c = color.terrainColor[(karta[g[:2]][0]).upper()]
-			pygame.draw.aaline(screen, new_c, (xy[0] * s + s / 2, xy[1] * s + s / 2),
-			                   (g[0] * s + s / 2, g[1] * s + s / 2), 1)
-		xy = (xy[0] + 1, xy[1]) if xy[0] != 99 else (0, xy[1] + 1)
-
-
 def draw_trees(pos: tuple[int, int], amount: int):
 	if amount <= 0:
 		return
@@ -121,15 +111,15 @@ def update_map():
 	global discovered
 	global agents
 	
-	# for i in lands:
-	#	draw_trees(i, lands[i].trees)
-	
-	# find trees
 	for g in karta:
 		if karta[g][0].isupper():
 			discovered[g] = karta[g][0]
-			if lands[g].trees > 0:
-				treeTiles.append(g)  # = lands[g].trees
+			
+			if lands[g].trees > 0 and g not in treeTiles:
+				treeTiles.append(g)
+			elif g in treeTiles:
+				treeTiles.remove(g)
+			
 			rect([g + (karta[g][0],)])
 			draw_trees(g, lands[g].trees)
 	
@@ -201,7 +191,7 @@ def ai_lab_3(without_traversing_delays=True):
 					# find a new path
 					else:
 						# check if the workers have already reached the goal
-						if karta[a.pos][0].upper() == 'T' and a.holding != ItemEnum.none:
+						if lands[a.pos].trees > 0 and a.holding != ItemEnum.none:
 							lands[a.pos].trees -= 1
 							draw_trees(a.pos, lands[a.pos].trees)
 							a.holding = ItemEnum.tree
