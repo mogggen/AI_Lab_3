@@ -73,5 +73,5 @@ def place_agents(discovered):
 			for dx, dy in r:
 				u = x + dx, y + dy
 				karta[u][0] = karta[u][0].upper()
-				discovered[u] = karta[u][0].upper()
+				discovered[u] = karta[u]
 			return x, y

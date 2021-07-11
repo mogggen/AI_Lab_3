@@ -39,7 +39,7 @@ treeTiles = []
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
-for _ in range(3):
+for _ in range(4):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
@@ -113,7 +113,7 @@ def update_map():
 	
 	for g in karta:
 		if karta[g][0].isupper():
-			discovered[g] = karta[g][0]
+			discovered[g] = karta[g]
 			
 			if lands[g].trees > 0 and g not in treeTiles:
 				treeTiles.append(g)
@@ -140,7 +140,7 @@ def graph_to_nodes(goal, current_agent_enum, graph=karta):
 		for g in graph:
 			if graph[g][0] in ('T', 'G', 'M'):
 				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), graph[g][1:])
-				print(graph[g][1:])
+				# print(graph[g][1:])
 	return nodelist
 
 
@@ -172,12 +172,12 @@ def ai_lab_3(without_traversing_delays=True):
 						a.agentType = AgentEnum.SCOUT
 						scouts += 1
 						continue
-					elif craftsmen < 1:
+					elif craftsmen < 0:
 						a.timer = time() + 120
 						a.agentType = AgentEnum.BUILDER
 						craftsmen += 1
 						continue
-					elif millers < 1:
+					elif millers < 0:
 						a.timer = time() + 120
 						a.agentType = AgentEnum.MILLER
 						millers += 1
@@ -200,15 +200,17 @@ def ai_lab_3(without_traversing_delays=True):
 							to_traverse = graph_to_nodes(startingPoint[:], AgentEnum.WORKER, discovered)
 							saved_time = time() + 100
 							a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
-						else:
-							for train in treeTiles:
-								if lands[train].trees > 0:  # all we had todo was to followed the damn train CJ
-									to_traverse = graph_to_nodes(train, AgentEnum.WORKER, discovered)
-									saved_time = time() + 100
-									a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
-								else:
-									# dispose of empty tree tiles from the list
-									treeTiles.pop(0)
+							while True:
+								for train in treeTiles:
+									if lands[train].trees > 0:  # all we had todo was to followed the damn train CJ
+										to_traverse = graph_to_nodes(train, AgentEnum.WORKER, discovered)
+										saved_time = time() + 100
+										a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+									else:
+										# dispose of empty tree tiles from the list
+										treeTiles.remove(train)
+										break
+								if len(treeTiles) == 0 or a.pathToGoal:
 									break
 				
 				if a.agentType == AgentEnum.SCOUT:
@@ -250,8 +252,9 @@ def ai_lab_3(without_traversing_delays=True):
 						charCoal += 1
 						a.timer = time() + 30
 		if int(agents[0].timer - time()) % 10 == 0:
-			print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
-			print("charCoal:", charCoal / 200, "%")
+			#print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
+			#print("charCoal:", charCoal / 200, "%")
+			print(lands[startingPoint].trees)
 		
 		update_map()
 

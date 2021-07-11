@@ -8,4 +8,3 @@ class AgentEnum:
 class ItemEnum:
 	none = 0
 	tree = 1
-	charcoal = 2
