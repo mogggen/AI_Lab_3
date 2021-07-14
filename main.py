@@ -8,10 +8,6 @@ from time import time
 
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
-# workers = []  # the rest
-# explorers = []  # 3
-# craftsmen = []  # 1 total
-
 pygame.init()
 WIDTH, HEIGHT = 1000, 1000
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -39,7 +35,7 @@ treeTiles = []
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
-for _ in range(50):
+for _ in range(6):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
@@ -58,6 +54,7 @@ s = 10
 def draw_players(p):
 	for i in p:
 		x, y = i.pos[0] * s + s // 2, i.pos[1] * s + s // 2
+		
 		# what type of agent should be rendered
 		if i.agentType == enums.AgentEnum.WORKER:
 			c = color.agentColor[0]
@@ -102,7 +99,7 @@ def find_trees(land):
 	global karta
 	
 	for g in karta:
-		if karta[g][0] == 'T':  # FIXME should be uppercase so only the discovered treeTiles draw trees
+		if karta[g][0] == 'T':
 			land.trees = 5
 		draw_trees(g, land.trees)
 
@@ -124,8 +121,6 @@ def update_map():
 			draw_trees(g, lands[g].trees)
 	
 	draw_players(agents)
-	
-	# draw_connections()
 	
 	pygame.display.flip()
 
@@ -151,15 +146,10 @@ def graph_to_nodes(goal, current_agent_enum, graph=karta):
 
 # game loop
 def ai_lab_3(without_traversing_delays=True):
+	baseTrees = 0
 	charCoal = 0
-	previousDeltaCalculationTime = 0
-	shortestTimeRemaining = time()
 	
 	while charCoal < 200:
-		for a in agents:
-			if (a.agentType in (AgentEnum.SCOUT, AgentEnum.WORKER)) and a.timer < shortestTimeRemaining:
-				shortestTimeRemaining = a.timer
-		# shortestTimeRemaining = min(agents, key=lambda t: t.timer).timer
 		workers = 0
 		scouts = 0
 		craftsmen = 0
@@ -188,39 +178,48 @@ def ai_lab_3(without_traversing_delays=True):
 						millers += 1
 						continue
 					
+					# follow the remaining of the path
 					if a.pathToGoal:
 						a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * \
-						          (1 + bool((karta[a.pos][0]).upper() == (terrain.walkables[0]).upper()))
+						          (1 + bool((karta[a.pathToGoal[0]][0]).upper() == (terrain.walkables[0]).upper()))
 						a.pos = a.pathToGoal.pop(0)
+						
+						if lands[a.pos].trees > 0 and a.holding != ItemEnum.tree:
+							lands[a.pos].trees -= 1
+							a.holding = ItemEnum.tree
+							a.timer = time() + 30
+							a.pathToGoal = []
+							print("remainingTrees at ", str(a.pos) + ":", lands[a.pos].trees)
+						print("0 worker path", a.pathToGoal)
+						input()
 					
 					# find a new path
 					else:
-						# check if the workers have already reached the goal
-						if lands[a.pos].trees > 0 and a.holding != ItemEnum.none:
-							lands[a.pos].trees -= 1
-							draw_trees(a.pos, lands[a.pos].trees)
-							a.holding = ItemEnum.tree
-							a.timer = time() + 30
-							continue
-						
-						# find the path home
-						if a.pos != startingPoint and a.holding != ItemEnum.none:
-							to_traverse = graph_to_nodes(startingPoint[:], AgentEnum.WORKER, discovered)
-							saved_time = time() + 100
-							a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
-							continue
-						
-						if a.pos == startingPoint and a.holding == ItemEnum.tree:
-							a.holding = ItemEnum.none
-							lands[a.pos].trees += 1
+						print("ran out of path at", a.pos, "startingPosition is at", startingPoint, "while holding ItemEnum:", "tree" if a.holding == 1 else "none", "(0: none, 1: tree)")
+						# what to do with the tree
+						if a.holding == ItemEnum.tree:
+							print("2 attempting to drop tree at home")
+							
+							# drop the tree at home
+							if a.pos == startingPoint:
+								a.holding = ItemEnum.none
+								baseTrees += 1
+								print("3 successfully added tree to baseTrees")
+								raise BaseException
+							
+							# find the path home
+							else:
+								to_traverse = graph_to_nodes(startingPoint, AgentEnum.WORKER, discovered)
+								a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+								print("4 finding path home")
 						
 						# find the path to a new tree
-						if a.holding != ItemEnum.tree:
+						else:
+							print("1 searching for treePath")
 							for train in treeTiles:
-								if lands[train].trees > 0:  # all we had todo was to follow damn train, CJ
+								if lands[train].trees > 0:
 									to_traverse = graph_to_nodes(train, AgentEnum.WORKER, discovered)
-									saved_time = time() + 100
-									a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+									a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
 									continue
 				
 				if a.agentType == AgentEnum.SCOUT:
@@ -232,39 +231,38 @@ def ai_lab_3(without_traversing_delays=True):
 					
 					# move to goal
 					elif a.pos == startingPoint:
-						# TODO perform conversion here
 						rng_undiscovered = terrain.find_scout_goal()
 						
 						to_traverse = graph_to_nodes(rng_undiscovered, a.agentType)
-						saved_time = time() + 100
-						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
 					
 					# return to starting point
 					else:
 						to_traverse = graph_to_nodes(startingPoint, a.agentType)
-						saved_time = time() + 100
-						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos, saved_time)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
 					
 					for n in r + ((0, 0),):
 						neigh = a.pos[0] + n[0], a.pos[1] + n[1]
 						karta[neigh][0] = (karta[neigh][0]).upper()
-						discovered[neigh] = karta[neigh] # FIXME gotcha!
+						discovered[neigh] = karta[neigh]
 				
 				if a.agentType == AgentEnum.BUILDER:
-					if karta[a.pos][0] == 'M' and lands[a.pos].trees >= 10:
-						lands[a.pos].trees -= 10
+					if karta[a.pos][0] == 'M' and baseTrees >= 10:
+						baseTrees -= 10
 						karta[a.pos][0] = 'K'
 						a.timer = time() + 60
 				
 				if a.agentType == AgentEnum.MILLER:
-					if karta[a.pos] == 'K' and lands[a.pos].trees >= 2:
-						lands[a.pos].trees -= 2
+					if karta[a.pos] == 'K' and baseTrees >= 2:
+						baseTrees -= 2
 						charCoal += 1
 						a.timer = time() + 30
+		
 		if int(agents[0].timer - time()) % 10 == 0:
 			#print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
 			#print("charCoal:", charCoal / 200, "%")
-			print(lands[startingPoint].trees)
+			#print(baseTrees)
+			pass
 		
 		update_map()
 
