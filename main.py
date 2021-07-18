@@ -125,18 +125,18 @@ def update_map():
 	pygame.display.flip()
 
 
-def graph_to_nodes(goal, current_agent_enum, graph=karta):
+def graph_to_nodes(goal, current_agent_enum):
 	nodelist = {}
 	if current_agent_enum == AgentEnum.SCOUT:
-		for g in graph:
-			if graph[g][0] in ('T', 'G', 'M', 't', 'g', 'm'):
-				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), graph[g][1:])
+		for g in karta:
+			if karta[g][0] in ('T', 'G', 'M', 'K' 't', 'g', 'm'):
+				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), karta[g][1:])
 	
 	elif current_agent_enum == AgentEnum.WORKER:
-		for g in graph:
-			if graph[g][0] in ('T', 'G', 'M'):
+		for g in discovered:
+			if karta[g][0] in ('T', 'G', 'M', 'K'):
 				walk = []
-				for n in graph[g][1:]:
+				for n in karta[g][1:]:
 					if n in discovered:
 						walk.append(n)
 				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), walk)
@@ -177,50 +177,34 @@ def ai_lab_3(without_traversing_delays=True):
 						a.agentType = AgentEnum.MILLER
 						millers += 1
 						continue
-					
-					# follow the remaining of the path
+
+					if lands[a.pos].trees > 0 and a.holding != ItemEnum.tree:
+						lands[a.pos].trees -= 1
+						a.holding = ItemEnum.tree
+						a.timer = time() + 30
+						a.pathToGoal = []
+						
+					# something with pos, g, h
 					if a.pathToGoal:
-						a.timer = pathfinding.move_cost(a.pos, a.pathToGoal[0]) * \
-						          (1 + bool((karta[a.pathToGoal[0]][0]).upper() == (terrain.walkables[0]).upper()))
-						a.pos = a.pathToGoal.pop(0)
-						
-						if lands[a.pos].trees > 0 and a.holding != ItemEnum.tree:
-							lands[a.pos].trees -= 1
-							a.holding = ItemEnum.tree
-							a.timer = time() + 30
-							a.pathToGoal = []
-							print("remainingTrees at ", str(a.pos) + ":", lands[a.pos].trees)
-						print("0 worker path", a.pathToGoal)
-						input()
+						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[0])
+						a.pos = a.pathToGoal.pop()
 					
-					# find a new path
-					else:
-						print("ran out of path at", a.pos, "startingPosition is at", startingPoint, "while holding ItemEnum:", "tree" if a.holding == 1 else "none", "(0: none, 1: tree)")
-						# what to do with the tree
+					# move to goal
+					elif a.pos == startingPoint and len(treeTiles):
 						if a.holding == ItemEnum.tree:
-							print("2 attempting to drop tree at home")
-							
-							# drop the tree at home
-							if a.pos == startingPoint:
-								a.holding = ItemEnum.none
-								baseTrees += 1
-								print("3 successfully added tree to baseTrees")
-								raise BaseException
-							
-							# find the path home
-							else:
-								to_traverse = graph_to_nodes(startingPoint, AgentEnum.WORKER, discovered)
-								a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
-								print("4 finding path home")
+							baseTrees += 1
+							a.holding = ItemEnum.none
+						to_traverse = graph_to_nodes(treeTiles[0], a.agentType)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+					
+					# return to starting point
+					else:
+						lands[a.pos].trees -= 1
+						a.holding = ItemEnum.tree
+						a.timer = time() + 30
 						
-						# find the path to a new tree
-						else:
-							print("1 searching for treePath")
-							for train in treeTiles:
-								if lands[train].trees > 0:
-									to_traverse = graph_to_nodes(train, AgentEnum.WORKER, discovered)
-									a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
-									continue
+						to_traverse = graph_to_nodes(startingPoint, a.agentType)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
 				
 				if a.agentType == AgentEnum.SCOUT:
 					
@@ -261,7 +245,7 @@ def ai_lab_3(without_traversing_delays=True):
 		if int(agents[0].timer - time()) % 10 == 0:
 			#print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
 			#print("charCoal:", charCoal / 200, "%")
-			#print(baseTrees)
+			print(baseTrees)
 			pass
 		
 		update_map()
