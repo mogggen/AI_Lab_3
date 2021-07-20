@@ -31,7 +31,10 @@ class Agent:
 
 lands = {}
 discovered = {}
+
 treeTiles = []
+millTiles = []
+
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
@@ -129,12 +132,12 @@ def graph_to_nodes(goal, current_agent_enum):
 	nodelist = {}
 	if current_agent_enum == AgentEnum.SCOUT:
 		for g in karta:
-			if karta[g][0] in ('T', 'G', 'M', 'K' 't', 'g', 'm'):
+			if karta[g][0] in ('T', 'G', 'M', 't', 'g', 'm'):
 				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), karta[g][1:])
 	
-	elif current_agent_enum == AgentEnum.WORKER:
+	else:
 		for g in discovered:
-			if karta[g][0] in ('T', 'G', 'M', 'K'):
+			if karta[g][0] in ('T', 'G', 'M'):
 				walk = []
 				for n in karta[g][1:]:
 					if n in discovered:
@@ -153,12 +156,10 @@ def ai_lab_3(without_traversing_delays=True):
 		workers = 0
 		scouts = 0
 		craftsmen = 0
-		millers = 0
 		for a in agents:
 			if a.agentType == AgentEnum.WORKER: workers += 1
 			if a.agentType == AgentEnum.SCOUT: scouts += 1
 			if a.agentType == AgentEnum.BUILDER: craftsmen += 1
-			if a.agentType == AgentEnum.MILLER: millers += 1
 			
 			if without_traversing_delays or time() > a.timer:
 				if a.agentType == AgentEnum.WORKER:
@@ -172,11 +173,6 @@ def ai_lab_3(without_traversing_delays=True):
 						a.agentType = AgentEnum.BUILDER
 						craftsmen += 1
 						continue
-					elif millers < 1:
-						a.timer = time() + 120
-						a.agentType = AgentEnum.MILLER
-						millers += 1
-						continue
 
 					if lands[a.pos].trees > 0 and a.holding != ItemEnum.tree:
 						lands[a.pos].trees -= 1
@@ -186,13 +182,14 @@ def ai_lab_3(without_traversing_delays=True):
 						
 					# something with pos, g, h
 					if a.pathToGoal:
-						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[0])
+						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[-1])
 						a.pos = a.pathToGoal.pop()
 					
 					# move to goal
 					elif a.pos == startingPoint and len(treeTiles):
 						if a.holding == ItemEnum.tree:
 							baseTrees += 1
+							print("Trees In inventory:", baseTrees)
 							a.holding = ItemEnum.none
 						to_traverse = graph_to_nodes(treeTiles[0], a.agentType)
 						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
@@ -200,6 +197,7 @@ def ai_lab_3(without_traversing_delays=True):
 					# return to starting point
 					else:
 						lands[a.pos].trees -= 1
+						print("tree tiles:", len(treeTiles))
 						a.holding = ItemEnum.tree
 						a.timer = time() + 30
 						
@@ -231,22 +229,26 @@ def ai_lab_3(without_traversing_delays=True):
 						discovered[neigh] = karta[neigh]
 				
 				if a.agentType == AgentEnum.BUILDER:
-					if karta[a.pos][0] == 'M' and baseTrees >= 10:
+					if karta[a.pos][0] == 'M' and baseTrees >= 10 and a.pos not in millTiles:
 						baseTrees -= 10
-						karta[a.pos][0] = 'K'
+						print("millTiles:", millTiles)
+						millTiles.append(a.pos)
 						a.timer = time() + 60
-				
-				if a.agentType == AgentEnum.MILLER:
-					if karta[a.pos] == 'K' and baseTrees >= 2:
+					
+					if karta[a.pos] in millTiles and baseTrees >= 2:
 						baseTrees -= 2
+						print("charCoal:", charCoal)
 						charCoal += 1
 						a.timer = time() + 30
-		
-		if int(agents[0].timer - time()) % 10 == 0:
-			#print(workers, scouts, craftsmen, millers, "time: ", (int(agents[0].timer - time())) if int(agents[0].timer - time()) < shortestTimeRemaining else shortestTimeRemaining)
-			#print("charCoal:", charCoal / 200, "%")
-			print(baseTrees)
-			pass
+					
+					if len(a.pathToGoal) > 0:
+						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[-1])
+						a.pos = a.pathToGoal.pop()
+					
+					elif a.pos not in millTiles and len(millTiles) > 0:
+						input("this shouldn't happen")
+						to_traverse = graph_to_nodes(millTiles[0], AgentEnum.BUILDER)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
 		
 		update_map()
 
