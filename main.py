@@ -42,7 +42,6 @@ for _ in range(6):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
-buildings = 'K',  # placed on 'M'
 
 for L in karta:
 	lands[L] = Land(karta[L][0])
@@ -132,7 +131,7 @@ def graph_to_nodes(goal, current_agent_enum):
 	nodelist = {}
 	if current_agent_enum == AgentEnum.SCOUT:
 		for g in karta:
-			if karta[g][0] in ('T', 'G', 'M', 't', 'g', 'm'):
+			if karta[g][0].upper() in ('T', 'G', 'M'):
 				nodelist[g] = pathfinding.Node(int((((g[0] - goal[0]) ** 2 + (g[1] - goal[1]) ** 2) ** .5) * 10), karta[g][1:])
 	
 	else:
@@ -229,25 +228,29 @@ def ai_lab_3(without_traversing_delays=True):
 						discovered[neigh] = karta[neigh]
 				
 				if a.agentType == AgentEnum.BUILDER:
+					
+					# Build a coalMill if there is none
 					if karta[a.pos][0] == 'M' and baseTrees >= 10 and a.pos not in millTiles:
 						baseTrees -= 10
 						print("millTiles:", millTiles)
 						millTiles.append(a.pos)
 						a.timer = time() + 60
 					
+					# if the miller is standing in the millTile and has enough resources to smelt
 					if karta[a.pos] in millTiles and baseTrees >= 2:
 						baseTrees -= 2
-						print("charCoal:", charCoal)
 						charCoal += 1
+						print("charCoal:", charCoal)
 						a.timer = time() + 30
 					
+					#
 					if len(a.pathToGoal) > 0:
 						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[-1])
 						a.pos = a.pathToGoal.pop()
 					
 					elif a.pos not in millTiles and len(millTiles) > 0:
-						input("this shouldn't happen")
-						to_traverse = graph_to_nodes(millTiles[0], AgentEnum.BUILDER)
+						builder_goal = terrain.find_builder_goal()
+						to_traverse = graph_to_nodes(builder_goal, AgentEnum.BUILDER)
 						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
 		
 		update_map()

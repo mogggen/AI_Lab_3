@@ -1,4 +1,4 @@
-import random
+from random import randint
 
 terrain = open("Map.txt", 'r')
 karta = {}
@@ -56,18 +56,23 @@ def walkable_edges():
 				karta[g] += [pos]
 
 
+def find_builder_goal():
+	while True:
+		where = randint(0, 99), randint(0, 99)
+		if karta[where][0] in walkables[0].upper():
+			return where
+
 def find_scout_goal():
 	while True:
-		where = random.randint(0, 9999)
-		scout_goal = where % 100, where // 100
-		if karta[scout_goal][0] in walkables:
-			return scout_goal
+		where = randint(0, 99), randint(0, 99)
+		if karta[where][0] in walkables:
+			return where
 
 
 def place_agents(discovered):
 	r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1), (0, 0)
 	while True:
-		where = random.randint(0, 9999)
+		where = randint(0, 9999)
 		x, y = where % 100, where // 100
 		if karta[x, y][0] == 'm':
 			for dx, dy in r:
