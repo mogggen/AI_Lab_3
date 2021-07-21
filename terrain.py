@@ -74,7 +74,7 @@ def place_agents(discovered):
 	while True:
 		where = randint(0, 9999)
 		x, y = where % 100, where // 100
-		if karta[x, y][0] == 'm':
+		if karta[x, y][0] in walkables:
 			for dx, dy in r:
 				u = x + dx, y + dy
 				karta[u][0] = karta[u][0].upper()
