@@ -4,7 +4,7 @@ from enums import AgentEnum, ItemEnum
 import terrain
 import color
 import pygame
-from time import time, sleep
+from time import time
 
 r = (1, 1), (0, 1), (1, 0), (-1, 1), (1, -1), (-1, 0), (0, -1), (-1, -1)
 
@@ -38,7 +38,7 @@ millTiles = []
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
-for _ in range(50):
+for _ in range(6):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
@@ -90,11 +90,11 @@ def draw_trees(pos: tuple[int, int], amount: int):
 		return
 	rect([pos + (karta[pos][0],)])
 	
-	loc = [29, 43, 5, 66, 13]
+	loc = [29, 43, 75, 54, 31]
 	for T in loc[:amount]:
-		square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 2, 2)
-		pygame.draw.rect(screen, color.terrainColor['T'], square, 1)
-		screen.fill(color.terrainColor['T'], square)
+		square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 3, 3)
+		pygame.draw.rect(screen, color.terrainColor['W'], square, 1)
+		screen.fill(color.terrainColor['W'], square)
 
 
 def find_trees(land):
@@ -106,15 +106,6 @@ def find_trees(land):
 		draw_trees(g, land.trees)
 
 
-def draw_buildings(g):
-	global karta
-	
-	if g in millTiles:
-		square = pygame.Rect(g, s, s)
-		pygame.draw.rect(screen, color.terrainColor['K'], square, 1)
-		screen.fill(color.terrainColor['K'], square)
-
-
 def update_map():
 	global discovered
 	global agents
@@ -123,15 +114,12 @@ def update_map():
 		if karta[g][0].isupper():
 			discovered[g] = karta[g]
 			
-			if lands[g].trees > 0 and g not in treeTiles:
+			if lands[g].trees > 0 and g not in treeTiles and g != startingPoint:  # xd
 				treeTiles.append(g)
 			elif g in treeTiles:
 				treeTiles.remove(g)
 			
-			if g in millTiles:
-				rect([g + ('K',)])
-			else:
-				rect([g + (karta[g][0],)])
+			rect([g + (karta[g][0],)])
 			draw_trees(g, lands[g].trees)
 	
 	draw_players(agents)
@@ -158,114 +146,112 @@ def graph_to_nodes(goal, current_agent_enum):
 	return nodelist
 
 
-def overlord(without_delays, baseTrees, charCoal):
-	workers = 0
-	scouts = 0
-	craftsmen = 0
-	millers = 0
-	
-	for a in agents:
-		if a.agentType == AgentEnum.WORKER: workers += 1
-		if a.agentType == AgentEnum.SCOUT: scouts += 1
-		if a.agentType == AgentEnum.BUILDER: craftsmen += 1
-		if a.agentType == AgentEnum.MILLER: millers += 1
-		
-		if without_delays or time() > a.timer:
-			if a.agentType == AgentEnum.WORKER:
-				if scouts < 3:
-					a.timer = time() + 60
-					a.agentType = AgentEnum.SCOUT
-					scouts += 1
-					return scouts
-				elif craftsmen < 1:
-					a.timer = time() + 120
-					a.agentType = AgentEnum.BUILDER
-					craftsmen += 1
-					return
-				elif millers < 1:
-					a.timer = time() + 120
-					a.agentType = AgentEnum.MILLER
-					millers += 1
-					return
-				
-				if lands[a.pos].trees > 0 and a.holding != ItemEnum.tree:
-					lands[a.pos].trees -= 1
-					a.holding = ItemEnum.tree
-					a.timer = time() + 30
-					a.pathToGoal = []
-				
-				# something with pos, g, h
-				if a.pathToGoal:
-					a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[-1])
-					a.pos = a.pathToGoal.pop()
-				
-				# move to goal
-				elif a.pos == startingPoint and len(treeTiles):
-					if a.holding == ItemEnum.tree:
-						baseTrees += 1
-						a.holding = ItemEnum.none
-					to_traverse = graph_to_nodes(treeTiles[0], a.agentType)
-					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
-				
-				# return to starting point
-				else:
-					lands[a.pos].trees -= 1
-					a.holding = ItemEnum.tree
-					a.timer = time() + 30
-					
-					to_traverse = graph_to_nodes(startingPoint, a.agentType)
-					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
-			
-			if a.agentType == AgentEnum.SCOUT:
-				
-				# something with pos, g, h
-				if a.pathToGoal:
-					a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[0])
-					a.pos = a.pathToGoal.pop()
-				
-				# move to goal
-				elif a.pos == startingPoint:
-					rng_undiscovered = terrain.find_scout_goal()
-					
-					to_traverse = graph_to_nodes(rng_undiscovered, a.agentType)
-					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
-				
-				# return to starting point
-				else:
-					to_traverse = graph_to_nodes(startingPoint, a.agentType)
-					a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
-				
-				for n in r + ((0, 0),):
-					neigh = a.pos[0] + n[0], a.pos[1] + n[1]
-					karta[neigh][0] = (karta[neigh][0]).upper()
-					discovered[neigh] = karta[neigh]
-			
-			if a.agentType == AgentEnum.BUILDER:
-				
-				# Build a coalMill if there is none in the place of the Builder
-				if karta[a.pos][0] == 'M' and baseTrees >= 10 and a.pos not in millTiles:
-					baseTrees -= 10
-					millTiles.append(a.pos)
-					a.timer = time() + 60
-			
-			if a.agentType == AgentEnum.MILLER:
-				
-				# if the miller is standing in the millTile and has enough resources to smelt
-				if a.pos in millTiles and baseTrees >= 2:
-					baseTrees -= 2
-					charCoal += 1
-					print("charCoal:", charCoal)
-					a.timer = time() + 30
-
-
 # game loop
-def ai_lab_3(without_delays=False):
+def ai_lab_3(without_traversing_delays=True):
 	baseTrees = 0
 	charCoal = 0
 	
 	while charCoal < 200:
-		overlord(without_delays, baseTrees, charCoal)
+		workers = 0
+		scouts = 0
+		craftsmen = 0
+		for a in agents:
+			if a.agentType == AgentEnum.WORKER: workers += 1
+			if a.agentType == AgentEnum.SCOUT: scouts += 1
+			if a.agentType == AgentEnum.BUILDER: craftsmen += 1
+			
+			if without_traversing_delays or time() > a.timer:
+				if a.agentType == AgentEnum.WORKER:
+					if scouts < 3:
+						a.timer = time() + 60
+						a.agentType = AgentEnum.SCOUT
+						scouts += 1
+						continue
+					elif craftsmen < 1:
+						a.timer = time() + 120
+						a.agentType = AgentEnum.BUILDER
+						craftsmen += 1
+						continue
+
+					if lands[a.pos].trees > 0 and a.holding != ItemEnum.tree:
+						lands[a.pos].trees -= 1
+						a.holding = ItemEnum.tree
+						a.timer = time() + 30
+						a.pathToGoal = []
+						
+					# something with pos, g, h
+					if a.pathToGoal:
+						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[-1])
+						a.pos = a.pathToGoal.pop()
+					
+					# move to goal
+					elif a.pos == startingPoint and len(treeTiles):
+						if a.holding == ItemEnum.tree:
+							baseTrees += 1
+							print("Trees In inventory:", baseTrees)
+							a.holding = ItemEnum.none
+						to_traverse = graph_to_nodes(treeTiles[0], a.agentType)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+					
+					# return to starting point
+					else:
+						lands[a.pos].trees -= 1
+						a.holding = ItemEnum.tree
+						a.timer = time() + 30
+						
+						to_traverse = graph_to_nodes(startingPoint, a.agentType)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+				
+				if a.agentType == AgentEnum.SCOUT:
+					
+					# something with pos, g, h
+					if a.pathToGoal:
+						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[0])
+						a.pos = a.pathToGoal.pop()
+					
+					# move to goal
+					elif a.pos == startingPoint:
+						rng_undiscovered = terrain.find_scout_goal()
+						
+						to_traverse = graph_to_nodes(rng_undiscovered, a.agentType)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+					
+					# return to starting point
+					else:
+						to_traverse = graph_to_nodes(startingPoint, a.agentType)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+					
+					for n in r + ((0, 0),):
+						neigh = a.pos[0] + n[0], a.pos[1] + n[1]
+						karta[neigh][0] = (karta[neigh][0]).upper()
+						discovered[neigh] = karta[neigh]
+				
+				if a.agentType == AgentEnum.BUILDER:
+					
+					# Build a coalMill if there is none
+					if karta[a.pos][0] == 'M' and baseTrees >= 10 and a.pos not in millTiles:
+						baseTrees -= 10
+						millTiles.append(a.pos)
+						a.timer = time() + 60
+					
+					# if the miller is standing in the millTiles and has enough resources to smelt
+					if a.pos in millTiles and baseTrees >= 2:
+						baseTrees -= 2
+						charCoal += 1
+						print("charCoal:", charCoal)
+						a.timer = time() + 30
+					
+					#
+					if len(a.pathToGoal) > 0:
+						a.timer = time() + pathfinding.move_cost(a.pos, a.pathToGoal[-1])
+						a.pos = a.pathToGoal.pop()
+					
+					elif a.pos not in millTiles and len(millTiles) > 0:
+						builder_goal = terrain.find_builder_goal()
+						to_traverse = graph_to_nodes(builder_goal, AgentEnum.BUILDER)
+						a.pathToGoal = pathfinding.a_star(to_traverse, a.pos)
+		
 		update_map()
 
 
-ai_lab_3(True)
+ai_lab_3()
