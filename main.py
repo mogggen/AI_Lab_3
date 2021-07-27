@@ -92,9 +92,9 @@ def draw_trees(pos: tuple[int, int], amount: int):
 	
 	loc = [29, 43, 75, 54, 31]
 	for T in loc[:amount]:
-		square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 2, 2)
-		pygame.draw.rect(screen, color.terrainColor['G'], square, 1)
-		screen.fill(color.terrainColor['G'], square)
+		square = pygame.Rect(pos[0] * 10 + T // 10, pos[1] * 10 + T % 10, 3, 3)
+		pygame.draw.rect(screen, color.terrainColor['W'], square, 1)
+		screen.fill(color.terrainColor['W'], square)
 
 
 def find_trees(land):
@@ -196,7 +196,6 @@ def ai_lab_3(without_traversing_delays=True):
 					# return to starting point
 					else:
 						lands[a.pos].trees -= 1
-						print("tree tiles:", len(treeTiles))
 						a.holding = ItemEnum.tree
 						a.timer = time() + 30
 						
@@ -232,12 +231,11 @@ def ai_lab_3(without_traversing_delays=True):
 					# Build a coalMill if there is none
 					if karta[a.pos][0] == 'M' and baseTrees >= 10 and a.pos not in millTiles:
 						baseTrees -= 10
-						print("millTiles:", millTiles)
 						millTiles.append(a.pos)
 						a.timer = time() + 60
 					
-					# if the miller is standing in the millTile and has enough resources to smelt
-					if karta[a.pos] in millTiles and baseTrees >= 2:
+					# if the miller is standing in the millTiles and has enough resources to smelt
+					if a.pos in millTiles and baseTrees >= 2:
 						baseTrees -= 2
 						charCoal += 1
 						print("charCoal:", charCoal)
