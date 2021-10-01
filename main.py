@@ -38,7 +38,7 @@ millTiles = []
 karta = terrain.init_map()
 startingPoint = terrain.place_agents(discovered)
 agents = []
-for _ in range(6):
+for _ in range(50):
 	agents.append(Agent(startingPoint[:]))
 
 terr = 'V', 'B', 'G', 'M', 'T'
@@ -85,7 +85,7 @@ def rect(p):
 		screen.fill(color.terrainColor[c], square)
 
 
-def draw_trees(pos: tuple[int, int], amount: int):
+def draw_trees(pos, amount):
 	if amount <= 0:
 		return
 	rect([pos + (karta[pos][0],)])
